@@ -58,13 +58,9 @@ function extractText(resp: any): string {
 }
 
 export async function chatGemini(apiKey: string, messages: Msg[], systemPrompt?: string) {
-  const attempts: { ver: 'v1' | 'v1beta'; model: string }[] = [
-    { ver: 'v1', model: 'gemini-1.5-flash' },
-    { ver: 'v1', model: 'gemini-1.5-pro' },
-    { ver: 'v1', model: 'gemini-1.0-pro' },
-    { ver: 'v1beta', model: 'gemini-1.5-flash' },
-    { ver: 'v1beta', model: 'gemini-1.5-pro' },
-    { ver: 'v1beta', model: 'gemini-1.0-pro' },
+  const attempts: { ver: 'v1beta'; model: string }[] = [
+    { ver: 'v1beta', model: 'gemini-2.5-pro' },
+    { ver: 'v1beta', model: 'gemini-2.5-flash' },
   ]
   let lastErr: any = null
   for (const { ver, model } of attempts) {
