@@ -42,7 +42,8 @@ export default function Chat() {
     try {
       const controller = new AbortController();
       abortRef.current = controller;
-      const base = import.meta.env.VITE_BACKEND_URL || window.location.origin;
+      const { getBackendBaseUrl } = await import('../../lib/baseUrl')
+      const base = getBackendBaseUrl();
       const res = await fetch(base + "/chat?stream=1", {
         method: "POST",
         headers: {

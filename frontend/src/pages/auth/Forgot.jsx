@@ -16,7 +16,7 @@ export default function Forgot(){
   }
   return (
     <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
-      <div className="card" style={{ width: 480 }}>
+      <div className="card2" style={{ width: 480 }}>
         <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Forgot Password</div>
         <form onSubmit={submit} className="col">
           <Field label="Email"><Input placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} /></Field>

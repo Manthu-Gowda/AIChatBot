@@ -11,6 +11,7 @@ body {
 
 .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
 .card { background: var(--color-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px; box-shadow: var(--shadow-sm); }
+.card2 { background: var(--color-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
 .input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); }
 .row { display: flex; gap: 12px; align-items: center; }
 .col { display: flex; flex-direction: column; gap: 10px; }

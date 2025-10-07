@@ -24,7 +24,7 @@ export default function Signup(){
   }
   return (
     <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
-      <div className="card" style={{ width: 420 }}>
+      <div className="card2" style={{ width: 420 }}>
         <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Create account</div>
         <form onSubmit={submit} className="col">
           <Field label="Full name"><Input placeholder="Jane Doe" value={name} onChange={e=>setName(e.target.value)} /></Field>
@@ -34,7 +34,7 @@ export default function Signup(){
           <Button type="submit">Sign up</Button>
         </form>
         <div style={{ marginTop: 10, fontSize:13 }}>
-          <Link to="/">Already have an account?</Link>
+          <Link style={{textDecoration: 'none'}} to="/">Already have an account?</Link>
         </div>
       </div>
     </div>

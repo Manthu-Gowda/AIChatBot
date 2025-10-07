@@ -23,7 +23,7 @@ export default function Login(){
   }
   return (
     <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
-      <div className="card" style={{ width: 380 }}>
+      <div className="card2" style={{ width: 380 }}>
         <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Welcome back</div>
         <form onSubmit={submit} className="col">
           <Field label="Email"><Input placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} /></Field>
@@ -31,8 +31,8 @@ export default function Login(){
           {error && <div style={{ color: 'crimson' }}>{error}</div>}
           <Button type="submit">Continue</Button>
         </form>
-        <div style={{ marginTop: 10, fontSize:13 }}>
-          <Link to="/forgot">Forgot password?</Link> · <Link to="/signup">Create account</Link>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 13 }}>
+          <Link style={{textDecoration: 'none'}} to="/forgot">Forgot password?</Link>  <Link style={{textDecoration: 'none'}} to="/signup">Create account</Link>
         </div>
       </div>
     </div>

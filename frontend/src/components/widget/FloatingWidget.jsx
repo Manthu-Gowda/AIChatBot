@@ -8,7 +8,8 @@ export default function FloatingWidget(){
   async function openWidget(){
     try {
       // fetch current user id
-      const base = (import.meta.env.VITE_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4000'))
+      const { getBackendBaseUrl } = await import('../../lib/baseUrl')
+      const base = getBackendBaseUrl()
       const meRes = await fetch(base + '/me', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       const me = await meRes.json()
       if (!me?.id) throw new Error('No user')
@@ -30,7 +31,7 @@ export default function FloatingWidget(){
     return () => window.removeEventListener('keydown', onKey)
   },[])
 
-  const srcBase = (import.meta.env.VITE_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4000')) + '/widget-layout'
+  const srcBase = (typeof window !== 'undefined' ? window.location.origin : (import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000')) + '/widget-layout'
   const src = token ? srcBase + `?token=${encodeURIComponent(token)}${projectId?`&projectId=${encodeURIComponent(projectId)}`:''}` : ''
 
   return (

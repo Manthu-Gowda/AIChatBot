@@ -55,7 +55,8 @@ function WidgetLayout() {
 
   async function send() {
     if (!msg.trim()) return
-    const base = (import.meta.env.VITE_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4000'))
+    const { getBackendBaseUrl } = await import('./lib/baseUrl')
+    const base = getBackendBaseUrl()
     setList((l) => [...l, { role: 'user', content: msg, ts: Date.now() }, { role: 'assistant', content: '', ts: Date.now() }])
     const res = await fetch(base + '/widget/chat?stream=1', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' },

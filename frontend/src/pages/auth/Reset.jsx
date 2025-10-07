@@ -19,7 +19,7 @@ export default function Reset(){
   }
   return (
     <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
-      <div className="card" style={{ width: 520 }}>
+      <div className="card2" style={{ width: 520 }}>
         <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Reset Password</div>
         <form onSubmit={submit} className="col">
           <Field label="Reset Token"><textarea className="input" placeholder="Reset Token" value={token} onChange={e=>setToken(e.target.value)} style={{height:120}} /></Field>

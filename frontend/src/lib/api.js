@@ -1,6 +1,7 @@
 import axios from 'axios'
+import { getBackendBaseUrl } from './baseUrl'
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4000')
+const BACKEND_URL = getBackendBaseUrl()
 
 export function getToken() { return localStorage.getItem('token') }
 export function setToken(t) { localStorage.setItem('token', t) }
