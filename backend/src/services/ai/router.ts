@@ -2,6 +2,7 @@ import { Provider } from '@prisma/client'
 import { chatOpenAI, streamOpenAI } from './openai'
 import { chatDeepSeek } from './deepseek'
 import { streamDeepSeek } from './deepseek'
+import { chatGemini, streamGemini } from './gemini'
 
 export async function chatWithProvider(p: Provider, apiKey: string, messages: { role: string; content: string }[], systemPrompt?: string) {
   switch (p) {
@@ -10,9 +11,11 @@ export async function chatWithProvider(p: Provider, apiKey: string, messages: { 
     case 'DEEPSEEK':
       return chatDeepSeek(apiKey, messages, systemPrompt)
     case 'GEMINI':
+      return chatGemini(apiKey, messages, systemPrompt)
     case 'PERPLEXITY':
       // Stubs: mimic AI response
       return `Stubbed ${p} response: ${messages[messages.length - 1]?.content ?? ''}`
+      // return chatPerplexity(apiKey, messages, systemPrompt)
     default:
       throw new Error('Unsupported provider')
   }
@@ -31,6 +34,7 @@ export async function streamWithProvider(
     case 'DEEPSEEK':
       return streamDeepSeek(apiKey, messages, systemPrompt, onToken)
     case 'GEMINI':
+      return streamGemini(apiKey, messages, systemPrompt, onToken)
     case 'PERPLEXITY': {
       // Stream a stubbed response word-by-word
       const text = `Stubbed ${p} response: ${messages[messages.length - 1]?.content ?? ''}`
