@@ -10,6 +10,7 @@ services:
       npm run build --prefix frontend
       npm run build --prefix backend
     startCommand: npm run start --prefix backend
+    postDeployCommand: npm run prisma:push --prefix backend
     envVars:
       - key: NODE_VERSION
         value: 18
@@ -21,12 +22,12 @@ services:
         value: https://aichatbot-yd2o.onrender.com
       - key: BACKEND_URL
         value: https://aichatbot-yd2o.onrender.com
-      # Configure these in the Render dashboard with your real values
-      # - key: DATABASE_URL
-      #   sync: false
-      # - key: JWT_SECRET
-      #   sync: false
-      # - key: ENCRYPTION_KEY
-      #   sync: false
+      # Configure these in the Render dashboard (values are not stored in Git)
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
       # - key: WIDGET_ALLOWED_ORIGINS
       #   value: https://your-site.example

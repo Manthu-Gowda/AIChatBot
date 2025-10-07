@@ -16,6 +16,11 @@ import { authLimiter, chatLimiter } from './middleware/rateLimit'
 import { errorHandler } from './middleware/error'
 
 dotenv.config({ path: path.resolve('.env') })
+// Fallback: when started from repo root, also try backend/.env if needed
+if (!process.env.DATABASE_URL) {
+  const backendEnv = path.resolve(process.cwd(), 'backend', '.env')
+  try { if (fs.existsSync(backendEnv)) dotenv.config({ path: backendEnv }) } catch {}
+}
 
 const app = express()
 // In development we disable helmet's contentSecurityPolicy because it can be
