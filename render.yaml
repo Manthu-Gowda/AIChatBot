@@ -15,6 +15,10 @@ services:
         value: 18
       - key: NODE_ENV
         value: production
+      - key: FRONTEND_URL
+        value: https://aichatbot-yd2o.onrender.com
+      - key: BACKEND_URL
+        value: https://aichatbot-yd2o.onrender.com
       # Configure these in the Render dashboard with your real values
       # - key: DATABASE_URL
       #   sync: false
@@ -22,10 +26,5 @@ services:
       #   sync: false
       # - key: ENCRYPTION_KEY
       #   sync: false
-      # - key: FRONTEND_URL
-      #   value: https://ai-chat-app.onrender.com
-      # - key: BACKEND_URL
-      #   value: https://ai-chat-app.onrender.com
       # - key: WIDGET_ALLOWED_ORIGINS
       #   value: https://your-site.example
-

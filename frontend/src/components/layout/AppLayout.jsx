@@ -13,7 +13,7 @@ export default function AppLayout({ title, right, children }){
       <aside className={styles.sidebar}>
         <div className={styles.brand}>AI Chat</div>
         <div className={styles.nav}>
-          <Link className={styles.link} to="/">New Chat</Link>
+          <Link className={styles.link} to="/chat">New Chat</Link>
           <Link className={styles.link} to="/settings/general">General Settings</Link>
           <Link className={styles.link} to="/projects/new">New Project</Link>
           <Link className={styles.link} to="/settings/profile">Profile Settings</Link>

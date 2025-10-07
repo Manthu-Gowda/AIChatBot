@@ -34,7 +34,7 @@ export default function Signup(){
           <Button type="submit">Sign up</Button>
         </form>
         <div style={{ marginTop: 10, fontSize:13 }}>
-          <Link to="/login">Already have an account?</Link>
+          <Link to="/">Already have an account?</Link>
         </div>
       </div>
     </div>

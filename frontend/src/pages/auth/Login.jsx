@@ -16,7 +16,7 @@ export default function Login(){
     try {
       const { data } = await api.post('/auth/login', { email, password })
       setToken(data.token)
-      nav(loc.state?.from?.pathname || '/')
+      nav(loc.state?.from?.pathname || '/chat')
     } catch (e) {
       setError(e.response?.data?.error?.message || 'Login failed')
     }

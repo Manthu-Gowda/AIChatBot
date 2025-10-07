@@ -19,7 +19,7 @@ import { TextArea } from './components/ui/Input'
 function Protected({ children }) {
   const token = getToken()
   const loc = useLocation()
-  if (!token) return <Navigate to="/login" state={{ from: loc }} replace />
+  if (!token) return <Navigate to="/" state={{ from: loc }} replace />
   return <>
     {children}
     <FloatingWidget />
@@ -29,12 +29,12 @@ function Protected({ children }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot" element={<Forgot />} />
       <Route path="/reset" element={<Reset />} />
 
-      <Route path="/" element={<Protected><Chat /></Protected>} />
+      <Route path="/chat" element={<Protected><Chat /></Protected>} />
       <Route path="/settings/general" element={<Protected><General /></Protected>} />
       <Route path="/settings/profile" element={<Protected><Profile /></Protected>} />
       <Route path="/projects/new" element={<Protected><NewProject /></Protected>} />
