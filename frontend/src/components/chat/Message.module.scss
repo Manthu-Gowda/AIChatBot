@@ -1,0 +1,6 @@
+.msg { display:flex; gap:12px; margin: 8px 0; align-items:flex-start; }
+.avatar { width: 28px; height: 28px; border-radius: 999px; background: var(--color-surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--muted); }
+.bubble { padding: 14px 16px; border-radius: 16px; max-width: 900px; box-shadow: var(--shadow-sm); border:1px solid var(--border); }
+.user { background: #f8fafc; margin-left: auto; }
+.assistant { background: #fff; }
+.meta { font-size: 11px; color: var(--muted); margin-top: 6px; }

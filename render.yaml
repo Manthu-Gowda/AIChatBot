@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: ai-chat-app
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: |
+      npm install --prefix backend
+      npm install --prefix frontend
+      npm run build --prefix frontend
+      npm run build --prefix backend
+    startCommand: npm run start --prefix backend
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: NODE_ENV
+        value: production
+      # Configure these in the Render dashboard with your real values
+      # - key: DATABASE_URL
+      #   sync: false
+      # - key: JWT_SECRET
+      #   sync: false
+      # - key: ENCRYPTION_KEY
+      #   sync: false
+      # - key: FRONTEND_URL
+      #   value: https://ai-chat-app.onrender.com
+      # - key: BACKEND_URL
+      #   value: https://ai-chat-app.onrender.com
+      # - key: WIDGET_ALLOWED_ORIGINS
+      #   value: https://your-site.example
+

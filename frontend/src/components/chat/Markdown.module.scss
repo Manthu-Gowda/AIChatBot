@@ -1,0 +1,15 @@
+.markdown {
+  line-height: 1.6;
+  font-size: 15px;
+}
+.markdown h1, .markdown h2, .markdown h3 { margin: 14px 0 8px; }
+.markdown h1 { font-size: 1.6rem; }
+.markdown h2 { font-size: 1.3rem; }
+.markdown h3 { font-size: 1.15rem; }
+.markdown p { margin: 8px 0; }
+.markdown ul, .markdown ol { margin: 8px 0 8px 20px; }
+.markdown code { background: #f3f4f6; padding: 2px 5px; border-radius: 6px; }
+.markdown pre { position: relative; background: #0f172a; color: #e5e7eb; padding: 12px; border-radius: 10px; overflow: auto; }
+.copyBtn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.2); border-radius:8px; padding:4px 8px; font-size:12px; cursor:pointer; }
+.hr { border:0; border-top:1px solid var(--border); margin:12px 0; }
+

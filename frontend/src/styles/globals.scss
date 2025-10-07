@@ -1,0 +1,27 @@
+@use './_tokens.scss' as *;
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: $font;
+  color: var(--color-text);
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+.card { background: var(--color-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px; box-shadow: var(--shadow-sm); }
+.input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); }
+.row { display: flex; gap: 12px; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+._bubble_w67jh_20._assistant_w67jh_33{
+  padding: 0 10px !important;
+}
+._bubble_w67jh_20._user_w67jh_28{
+  padding: 0 10px !important;
+}
+
+._markdown_7v0pc_1{
+  font-size: 14px !important;
+  line-height: normal !important;
+}

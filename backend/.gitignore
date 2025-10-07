@@ -1,0 +1,50 @@
+# Node dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Debug
+.DS_Store
+
+# OS files
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+
+# Uploads and generated files
+backend/uploads/
+public/uploads/
+/uploads/
+
+# Prisma
+prisma/dev.db
+
+# Jest cache
+jest-cache/
+
+# Optional npm cache
+.npm
+
+# Lock files (if you prefer not to track)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
