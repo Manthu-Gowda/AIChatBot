@@ -22,6 +22,28 @@ if (!process.env.DATABASE_URL) {
   try { if (fs.existsSync(backendEnv)) dotenv.config({ path: backendEnv }) } catch {}
 }
 
+// --- Startup environment validation: fail fast with a helpful message ---
+function checkRequiredEnvVars() {
+  const required = ['DATABASE_URL', 'JWT_SECRET', 'ENCRYPTION_KEY']
+  const missing = required.filter(k => !process.env[k])
+  if (missing.length > 0) {
+    // eslint-disable-next-line no-console
+    console.error('\nFATAL: Missing required environment variables:')
+    // eslint-disable-next-line no-console
+    console.error(missing.map(m => ` - ${m}`).join('\n'))
+    // Helpful guidance
+    // eslint-disable-next-line no-console
+    console.error('\nIf you are running on Render: open your service in the Render dashboard -> Environment -> Add the variables (DATABASE_URL, JWT_SECRET, ENCRYPTION_KEY)')
+    // eslint-disable-next-line no-console
+    console.error('If running locally, create a .env file in the backend folder or the repository root with these values.')
+    // eslint-disable-next-line no-console
+    console.error('The deployment post-deploy step (prisma db push) requires DATABASE_URL to be present at deploy time.')
+    process.exit(1)
+  }
+}
+
+checkRequiredEnvVars()
+
 const app = express()
 // In development we disable helmet's contentSecurityPolicy because it can be
 // overly restrictive (default-src 'none') and block DevTools/.well-known

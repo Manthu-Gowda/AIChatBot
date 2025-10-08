@@ -3,6 +3,7 @@ import { prisma } from '../prisma/client'
 import { forgotSchema, loginSchema, resetSchema, signupSchema } from '../utils/validator'
 import bcrypt from 'bcrypt'
 import { signJwt } from '../utils/jwt'
+import { verify } from 'jsonwebtoken'
 
 const router = Router()
 
@@ -51,10 +52,9 @@ router.post('/forgot', async (req, res, next) => {
 router.post('/reset', async (req, res, next) => {
   try {
     const { token, password } = resetSchema.parse(req.body)
-    // verify in jwt util directly to keep deps small in router
-    const payload = (await import('jsonwebtoken')).then(m => m.verify(token, process.env.JWT_SECRET || 'dev_jwt_secret_change_me')) as any
-    const pl = (await payload) as any
-    if (pl.typ !== 'reset') return res.status(400).json({ error: { message: 'Invalid token' } })
+  // verify token
+  const pl = verify(token, process.env.JWT_SECRET || 'dev_jwt_secret_change_me') as any
+  if (pl.typ !== 'reset') return res.status(400).json({ error: { message: 'Invalid token' } })
     const passwordHash = await bcrypt.hash(password, 10)
     await prisma.user.update({ where: { id: pl.sub as string }, data: { passwordHash } })
     res.json({ ok: true })
