@@ -111,6 +111,8 @@ function resolveWidgetScript(): string {
 }
 app.get('/widget.js', (_req, res) => {
   const file = resolveWidgetScript()
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+  res.setHeader('Access-Control-Allow-Origin', '*')
   return res.sendFile(file)
 })
 
@@ -152,6 +154,15 @@ app.get(['/widget-layout', '/widget'], (req, res) => {
   const q = new URLSearchParams(req.query as any).toString()
   if (isProd) {
     // Serve the SPA entry; route is handled client-side
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+    // Allow embedding in iframes from other origins (widget use-case)
+    res.removeHeader('X-Frame-Options')
+    // Loosen CSP frame-ancestors specifically for widget layout
+    res.removeHeader('Content-Security-Policy')
+    if (WIDGET_ALLOWED_ORIGINS.length > 0) {
+      const fa = ["'self'", ...WIDGET_ALLOWED_ORIGINS].join(' ')
+      res.setHeader('Content-Security-Policy', `frame-ancestors ${fa}`)
+    }
     return res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
   }
   const url = `${FRONTEND_URL}/widget-layout${q ? `?${q}` : ''}`
