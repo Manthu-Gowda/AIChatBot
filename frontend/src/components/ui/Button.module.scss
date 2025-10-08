@@ -11,6 +11,19 @@
   box-shadow: var(--shadow-sm);
   transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
 }
+.btn2{
+  --bg: var(--color-primary);
+  --fg: #fff;
+  background: var(--bg);
+  color: var(--fg);
+  border: 0;
+  padding: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+}
 .btn:hover { box-shadow: var(--shadow-md); }
 .btn:active { transform: translateY(1px); }
 .secondary { --bg: var(--color-surface-2); --fg: var(--color-text); }

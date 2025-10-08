@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import fs from 'fs'
 import { prisma } from '../prisma/client'
 import { AuthRequest, requireAuth } from '../middleware/auth'
 import { projectCreateSchema } from '../utils/validator'
@@ -18,7 +19,16 @@ router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
 router.get('/', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const projects = await prisma.project.findMany({ where: { userId: req.user!.id }, orderBy: { createdAt: 'desc' } })
-    res.json(projects)
+    // Enrich with file counts and total size (best-effort disk stat)
+    const enriched = await Promise.all(projects.map(async (p) => {
+      const filePaths = await prisma.projectFile.findMany({ where: { projectId: p.id }, select: { path: true } })
+      let totalBytes = 0
+      for (const f of filePaths) {
+        try { const st = fs.statSync(f.path); totalBytes += st.size } catch {}
+      }
+      return { ...p, fileCount: filePaths.length, totalBytes }
+    }))
+    res.json(enriched)
   } catch (e) { next(e) }
 })
 
@@ -33,14 +43,24 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res, next) => {
 router.put('/:id', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const data = projectCreateSchema.partial().parse(req.body)
-    const p = await prisma.project.update({ where: { id: req.params.id }, data })
+    const existing = await prisma.project.findFirst({ where: { id: req.params.id, userId: req.user!.id } })
+    if (!existing) return res.status(404).json({ error: { message: 'Not found' } })
+    const p = await prisma.project.update({ where: { id: existing.id }, data })
     res.json(p)
   } catch (e) { next(e) }
 })
 
 router.delete('/:id', requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    await prisma.project.delete({ where: { id: req.params.id } })
+    const project = await prisma.project.findFirst({ where: { id: req.params.id, userId: req.user!.id }, include: { files: true } })
+    if (!project) return res.status(404).json({ error: { message: 'Not found' } })
+    // Remove uploaded files from disk (best-effort)
+    for (const f of project.files) {
+      try { if (f.path) fs.unlinkSync(f.path) } catch {}
+    }
+    // Delete file records then project
+    await prisma.projectFile.deleteMany({ where: { projectId: project.id } })
+    await prisma.project.delete({ where: { id: project.id } })
     res.json({ ok: true })
   } catch (e) { next(e) }
 })
@@ -64,5 +84,17 @@ router.post('/:id/files', requireAuth, upload.array('files'), async (req: AuthRe
   } catch (e) { next(e) }
 })
 
-export default router
+// Delete a single file from a project
+router.delete('/:id/files/:fileId', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const project = await prisma.project.findFirst({ where: { id: req.params.id, userId: req.user!.id } })
+    if (!project) return res.status(404).json({ error: { message: 'Not found' } })
+    const file = await prisma.projectFile.findFirst({ where: { id: req.params.fileId, projectId: project.id } })
+    if (!file) return res.status(404).json({ error: { message: 'File not found' } })
+    try { if (file.path) fs.unlinkSync(file.path) } catch {}
+    await prisma.projectFile.delete({ where: { id: file.id } })
+    return res.json({ ok: true })
+  } catch (e) { next(e) }
+})
 
+export default router

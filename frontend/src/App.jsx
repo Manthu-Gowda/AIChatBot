@@ -8,6 +8,7 @@ import Chat from './pages/chat/Chat'
 import General from './pages/settings/General'
 import Profile from './pages/settings/Profile'
 import NewProject from './pages/projects/NewProject'
+import Projects from './pages/projects/Projects'
 import ProjectChat from './pages/projects/ProjectChat'
 import { getToken } from './lib/api'
 import FloatingWidget from './components/widget/FloatingWidget'
@@ -37,7 +38,9 @@ export default function App() {
       <Route path="/chat" element={<Protected><Chat /></Protected>} />
       <Route path="/settings/general" element={<Protected><General /></Protected>} />
       <Route path="/settings/profile" element={<Protected><Profile /></Protected>} />
+      <Route path="/projects" element={<Protected><Projects /></Protected>} />
       <Route path="/projects/new" element={<Protected><NewProject /></Protected>} />
+      <Route path="/projects/:id/edit" element={<Protected><NewProject /></Protected>} />
       <Route path="/projects/:id/chat" element={<Protected><ProjectChat /></Protected>} />
 
       <Route path="/widget-layout" element={<WidgetLayout />} />

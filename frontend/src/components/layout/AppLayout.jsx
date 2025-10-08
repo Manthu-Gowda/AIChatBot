@@ -15,7 +15,7 @@ export default function AppLayout({ title, right, children }){
         <div className={styles.nav}>
           <Link className={styles.link} to="/chat">New Chat</Link>
           <Link className={styles.link} to="/settings/general">General Settings</Link>
-          <Link className={styles.link} to="/projects/new">New Project</Link>
+          <Link className={styles.link} to="/projects">Projects</Link>
           <Link className={styles.link} to="/settings/profile">Profile Settings</Link>
         </div>
         <div style={{marginTop:'auto', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
