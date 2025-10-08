@@ -10,14 +10,17 @@ router.get('/', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const s = await prisma.settings.findUnique({ where: { userId: req.user!.id } })
     if (!s) return res.json(null)
+    let openai: string | undefined
+    let deepseek: string | undefined
+    let gemini: string | undefined
+    let perplexity: string | undefined
+    try { if (s.openaiKeyEnc) openai = maskKey('' + decrypt(s.openaiKeyEnc)) } catch {}
+    try { if (s.deepseekKeyEnc) deepseek = maskKey('' + decrypt(s.deepseekKeyEnc)) } catch {}
+    try { if (s.geminiKeyEnc) gemini = maskKey('' + decrypt(s.geminiKeyEnc)) } catch {}
+    try { if (s.perplexityKeyEnc) perplexity = maskKey('' + decrypt(s.perplexityKeyEnc)) } catch {}
     res.json({
       defaultProvider: s.defaultProvider,
-      apiKeys: {
-        openai: s.openaiKeyEnc ? maskKey('' + decrypt(s.openaiKeyEnc)) : undefined,
-        deepseek: s.deepseekKeyEnc ? maskKey('' + decrypt(s.deepseekKeyEnc)) : undefined,
-        gemini: s.geminiKeyEnc ? maskKey('' + decrypt(s.geminiKeyEnc)) : undefined,
-        perplexity: s.perplexityKeyEnc ? maskKey('' + decrypt(s.perplexityKeyEnc)) : undefined,
-      },
+      apiKeys: { openai, deepseek, gemini, perplexity },
     })
   } catch (e) { next(e) }
 })
@@ -44,4 +47,3 @@ router.put('/', requireAuth, async (req: AuthRequest, res, next) => {
 })
 
 export default router
-

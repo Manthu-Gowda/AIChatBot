@@ -45,7 +45,9 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
       case 'PERPLEXITY': keyEnc = settings?.perplexityKeyEnc ?? null; break
     }
     if (!keyEnc) return res.status(400).json({ error: { message: 'Missing API key', provider } })
-    const apiKey = decrypt(keyEnc)
+    let apiKey: string
+    try { apiKey = decrypt(keyEnc) }
+    catch { return res.status(400).json({ error: { message: 'Unable to decrypt stored API key. ENCRYPTION_KEY likely changed. Please re-enter the provider API key.' }, provider }) }
 
     let systemPrompt: string | undefined
     if (projectId) {

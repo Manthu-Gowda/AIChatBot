@@ -28,7 +28,12 @@ router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
     if (!keyEnc) {
       return res.status(400).json({ error: { message: 'Missing API key for selected provider', provider } })
     }
-    const apiKey = keyEnc ? decrypt(keyEnc) : ''
+    let apiKey = ''
+    try {
+      apiKey = keyEnc ? decrypt(keyEnc) : ''
+    } catch (err) {
+      return res.status(400).json({ error: { message: 'Unable to decrypt stored API key. ENCRYPTION_KEY likely changed. Please re-enter your provider API key in Settings.' }, provider })
+    }
 
     // Load/prepare conversation
     let conv = conversationId
