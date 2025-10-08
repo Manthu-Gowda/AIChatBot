@@ -95,9 +95,23 @@ app.use(
   })
 )
 
-// Static widget assets: serve the single widget.js file directly
+// Static widget assets: serve the single widget.js file directly (robust path resolution)
+function resolveWidgetScript(): string {
+  const candidates = [
+    path.resolve(process.cwd(), 'backend', 'public', 'widget.js'),
+    path.resolve(process.cwd(), 'public', 'widget.js'),
+    path.resolve(__dirname, '..', '..', 'public', 'widget.js'), // when running from compiled dist
+    path.resolve(__dirname, '..', '..', '..', 'public', 'widget.js'),
+  ]
+  for (const p of candidates) {
+    try { if (fs.existsSync(p)) return p } catch {}
+  }
+  // Fallback to repo-style path
+  return path.resolve(process.cwd(), 'backend', 'public', 'widget.js')
+}
 app.get('/widget.js', (_req, res) => {
-  return res.sendFile(path.resolve(process.cwd(), 'backend', 'public', 'widget.js'))
+  const file = resolveWidgetScript()
+  return res.sendFile(file)
 })
 
 // Serve built frontend in production
