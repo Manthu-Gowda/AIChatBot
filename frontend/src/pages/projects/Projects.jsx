@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AppLayout from '../../components/layout/AppLayout'
 import Button from '../../components/ui/Button'
 import { api } from '../../lib/api'
+import { getBackendBaseUrl } from '../../lib/baseUrl'
 import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { CiChat2 } from "react-icons/ci";
@@ -12,6 +13,8 @@ export default function Projects(){
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
+  const [tenantId, setTenantId] = useState('')
+  const [copiedId, setCopiedId] = useState('')
 
   async function load(){
     setLoading(true); setErr('')
@@ -20,12 +23,30 @@ export default function Projects(){
     finally { setLoading(false) }
   }
 
-  useEffect(()=>{ load() },[])
+  useEffect(()=>{ load(); (async()=>{ try { const { data } = await api.get('/me'); setTenantId(data?.id || '') } catch {} })() },[])
 
   async function onDelete(id){
     if (!confirm('Delete this project? This cannot be undone.')) return
     try { await api.delete('/projects/'+id); await load() }
     catch (e){ alert(e?.message || 'Delete failed') }
+  }
+
+  function buildEmbed(projectId){
+    const base = getBackendBaseUrl()
+    return `<script src="${base}/widget.js" data-tenant="${tenantId}" data-project="${projectId}" async></script>`
+  }
+
+  async function copyEmbed(projectId){
+    try {
+      const text = buildEmbed(projectId)
+      await navigator.clipboard.writeText(text)
+      setCopiedId(projectId)
+      setTimeout(()=> setCopiedId(''), 1500)
+    } catch (e) {
+      alert('Copy failed. Please copy manually from the console.')
+      // eslint-disable-next-line no-console
+      console.log(buildEmbed(projectId))
+    }
   }
 
   return (
@@ -43,6 +64,7 @@ export default function Projects(){
                 <th style={{ padding:12 }}>Role</th>
                 <th style={{ padding:12 }}>Files</th>
                 <th style={{ padding:12 }}>Created</th>
+                <th style={{ padding:12 }}>Embed</th>
                 <th style={{ padding:12 }}>Actions</th>
               </tr>
             </thead>
@@ -58,6 +80,11 @@ export default function Projects(){
                     )}
                   </td>
                   <td style={{ padding:12 }}>{new Date(p.createdAt).toLocaleString()}</td>
+                  <td style={{ padding:12 }}>
+                    <button className="btn2" onClick={()=>copyEmbed(p.id)} title="Copy embed code" disabled={!tenantId}>
+                      {copiedId === p.id ? 'Copied!' : 'Copy'}
+                    </button>
+                  </td>
                   <td style={{ padding:12, display:'flex', gap:8 }}>
                     <button className="btn2" onClick={()=>nav('/projects/'+p.id+'/edit')} title="Edit"><FaEdit /></button>
                     <button className="btn2" onClick={()=>onDelete(p.id)} title="Delete"><MdDelete /></button>
@@ -66,7 +93,7 @@ export default function Projects(){
                 </tr>
               ))}
               {list.length === 0 && (
-                <tr><td colSpan={5} style={{ padding:12, color:'var(--muted)' }}>No projects yet.</td></tr>
+                <tr><td colSpan={6} style={{ padding:12, color:'var(--muted)' }}>No projects yet.</td></tr>
               )}
             </tbody>
           </table>
