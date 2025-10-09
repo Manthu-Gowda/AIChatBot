@@ -5,9 +5,10 @@ import Button from '../../components/ui/Button'
 import Loader from '../../components/loader/Loader'
 import { api } from '../../lib/api'
 import { getBackendBaseUrl } from '../../lib/baseUrl'
-import { FaEdit } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
-import { CiChat2 } from "react-icons/ci";
+import { FaEdit } from "react-icons/fa"
+import { MdDelete } from "react-icons/md"
+import { CiChat2 } from "react-icons/ci"
+import styles from './Projects.module.scss'
 
 export default function Projects(){
   const nav = useNavigate()
@@ -51,49 +52,71 @@ export default function Projects(){
   }
 
   return (
-    <AppLayout title="Projects" right={<Button onClick={()=>nav('/projects/new')}>Create Project</Button>}>
+    <AppLayout title="Projects" right={<Button onClick={()=>nav('/projects/new')}>+ Create Project</Button>}>
       {loading && <Loader />}
-      <div className="card" style={{ background:'#fff', padding:0 }}>
+      <div className={styles.tableCard}>
         {err ? (
-          <div style={{ padding:12, color:'crimson' }}>{err}</div>
+          <div className={styles.errorState}>{err}</div>
         ) : (
-          <table style={{ width:'100%', borderCollapse:'collapse' }}>
+          <table className={styles.table}>
             <thead>
-              <tr style={{ textAlign:'left', borderBottom:'1px solid var(--border)' }}>
-                <th style={{ padding:12 }}>Name</th>
-                <th style={{ padding:12 }}>Role</th>
-                <th style={{ padding:12 }}>Files</th>
-                <th style={{ padding:12 }}>Created</th>
-                <th style={{ padding:12 }}>Embed</th>
-                <th style={{ padding:12 }}>Actions</th>
+              <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Files</th>
+                <th>Created</th>
+                <th>Embed</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {list.map(p => (
-                <tr key={p.id} style={{ borderBottom:'1px solid #eee' }}>
-                  <td style={{ padding:12 }}>{p.name}</td>
-                  <td style={{ padding:12 }}>{p.role || '-'}</td>
-                  <td style={{ padding:12 }}>
-                    {p.fileCount || 0}
-                    {typeof p.totalBytes === 'number' && (
-                      <span style={{ color:'var(--muted)', marginLeft: 6 }}>({formatBytes(p.totalBytes)})</span>
-                    )}
+                <tr key={p.id}>
+                  <td><strong>{p.name}</strong></td>
+                  <td>{p.role || '-'}</td>
+                  <td>
+                    <div className={styles.fileInfo}>
+                      <span>{p.fileCount || 0}</span>
+                      {typeof p.totalBytes === 'number' && (
+                        <span className={styles.fileSize}>({formatBytes(p.totalBytes)})</span>
+                      )}
+                    </div>
                   </td>
-                  <td style={{ padding:12 }}>{new Date(p.createdAt).toLocaleString()}</td>
-                  <td style={{ padding:12 }}>
-                    <button className="btn2" onClick={()=>copyEmbed(p.id)} title="Copy embed code" disabled={!tenantId}>
-                      {copiedId === p.id ? 'Copied!' : 'Copy'}
+                  <td>{new Date(p.createdAt).toLocaleDateString()}</td>
+                  <td>
+                    <button 
+                      className={`btn2 ${styles.embedButton} ${copiedId === p.id ? styles.copied : ''}`}
+                      onClick={()=>copyEmbed(p.id)} 
+                      title="Copy embed code" 
+                      disabled={!tenantId}
+                    >
+                      {copiedId === p.id ? '✓ Copied!' : '📋 Copy'}
                     </button>
                   </td>
-                  <td style={{ padding:12, display:'flex', gap:8 }}>
-                    <button className="btn2" onClick={()=>nav('/projects/'+p.id+'/edit')} title="Edit"><FaEdit /></button>
-                    <button className="btn2" onClick={()=>onDelete(p.id)} title="Delete"><MdDelete /></button>
-                    <button className="btn2" onClick={()=>nav('/projects/'+p.id+'/chat')} title="Open Chat"><CiChat2 /></button>
+                  <td>
+                    <div className={styles.actionButtons}>
+                      <button className="btn2" onClick={()=>nav('/projects/'+p.id+'/edit')} title="Edit">
+                        <FaEdit />
+                      </button>
+                      <button className="btn2" onClick={()=>onDelete(p.id)} title="Delete">
+                        <MdDelete />
+                      </button>
+                      <button className="btn2" onClick={()=>nav('/projects/'+p.id+'/chat')} title="Open Chat">
+                        <CiChat2 />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {list.length === 0 && (
-                <tr><td colSpan={6} style={{ padding:12, color:'var(--muted)' }}>No projects yet.</td></tr>
+                <tr>
+                  <td colSpan={6}>
+                    <div className={styles.emptyState}>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>📁</div>
+                      <div>No projects yet. Create your first project to get started!</div>
+                    </div>
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

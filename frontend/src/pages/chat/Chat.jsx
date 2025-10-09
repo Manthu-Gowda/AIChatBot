@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import Message from "../../components/chat/Message";
 import Button from "../../components/ui/Button";
 import { Select, TextArea } from "../../components/ui/Input";
+import styles from "./Chat.module.scss";
 
 export default function Chat() {
   const [message, setMessage] = useState("");
@@ -122,84 +123,63 @@ export default function Chat() {
 
   return (
     <AppLayout title="Chat">
-      <div
-        className="card"
-        style={{
-          marginBottom: 12,
-          display: "flex",
-          gap: 12,
-          alignItems: "center",
-        }}
-      >
-        <div>Provider</div>
-        <Select value={provider} onChange={(e) => setProvider(e.target.value)}>
-          <option>OPENAI</option>
-          <option>DEEPSEEK</option>
-          <option>GEMINI</option>
-          <option>PERPLEXITY</option>
-        </Select>
-        <div>Project</div>
-        <Select
-          value={projectId}
-          onChange={(e) => setProjectId(e.target.value)}
-        >
-          <option value="">None</option>
-          {projects.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </Select>
+      <div className={styles.chatControls}>
+        <div className={styles.controlGroup}>
+          <label>Provider</label>
+          <Select value={provider} onChange={(e) => setProvider(e.target.value)}>
+            <option>OPENAI</option>
+            <option>DEEPSEEK</option>
+            <option>GEMINI</option>
+            <option>PERPLEXITY</option>
+          </Select>
+        </div>
+        <div className={styles.controlGroup}>
+          <label>Project</label>
+          <Select
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+          >
+            <option value="">None</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
 
-      <div
-        className="card"
-        style={{
-          height: "calc(100vh - 200px)",
-          background: "#fff",
-          padding: 0,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <div
-          ref={listRef}
-          style={{
-            flex: 1,
-            overflow: "auto",
-            padding: 12,
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-          }}
-        >
-          {list.map((m, i) => {
-            const isLast = i === list.length - 1
-            const showTyping = isLast && m.role === 'assistant' && pending && !m.content
-            return (
-              <Message
-                key={i}
-                role={m.role}
-                content={m.content}
-                ts={m.ts || Date.now()}
-                typing={showTyping}
-              />
-            )
-          })}
+      <div className={styles.chatContainer}>
+        <div ref={listRef} className={styles.messageList}>
+          {list.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.icon}>💬</div>
+              <h3>Start a Conversation</h3>
+              <p>Ask me anything and I'll help you!</p>
+            </div>
+          ) : (
+            list.map((m, i) => {
+              const isLast = i === list.length - 1
+              const showTyping = isLast && m.role === 'assistant' && pending && !m.content
+              return (
+                <Message
+                  key={i}
+                  role={m.role}
+                  content={m.content}
+                  ts={m.ts || Date.now()}
+                  typing={showTyping}
+                />
+              )
+            })
+          )}
         </div>
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "var(--radius-lg)",
-            padding: 12,
-          }}
-        >
-          <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
+        
+        <div className={styles.inputArea}>
+          <div className={styles.inputWrapper}>
             <TextArea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Ask anything..."
-              style={{ flex: 1, height: 100 }}
+              placeholder="Ask anything... (Press Enter to send, Shift+Enter for new line)"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -207,14 +187,17 @@ export default function Chat() {
                 }
               }}
             />
-            <Button onClick={send} disabled={pending}>
-              {pending ? "Sending..." : "Send"}
-            </Button>
-            {pending && (
-              <Button variant="ghost" onClick={stop}>
-                Stop
-              </Button>
-            )}
+            <div className={styles.buttonGroup}>
+              {pending ? (
+                <Button variant="ghost" onClick={stop}>
+                  ⏹ Stop
+                </Button>
+              ) : (
+                <Button onClick={send} disabled={!message.trim()}>
+                  📤 Send
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

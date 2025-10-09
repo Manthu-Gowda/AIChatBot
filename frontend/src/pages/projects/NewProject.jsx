@@ -5,6 +5,7 @@ import AppLayout from '../../components/layout/AppLayout'
 import Button from '../../components/ui/Button'
 import { Field, Input, TextArea } from '../../components/ui/Input'
 import Loader from '../../components/loader/Loader'
+import styles from './NewProject.module.scss'
 
 export default function NewProject(){
   const nav = useNavigate()
@@ -67,40 +68,86 @@ export default function NewProject(){
   return (
     <AppLayout title={id ? 'Edit Project' : 'New Project'}>
       {(loading || submitting) && <Loader />}
-      <div className="card" style={{ maxWidth: 840 }}>
-        <div className="col" style={{ gap: 16 }}>
-          <Field label="Project Name"><Input placeholder="Project Name" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} /></Field>
-          <Field label="Role"><Input placeholder="Role" value={form.role} onChange={e=>setForm({...form, role:e.target.value})} /></Field>
-          <Field label="Responsibilities"><TextArea placeholder="Responsibilities" value={form.responsibilities} onChange={e=>setForm({...form, responsibilities:e.target.value})} /></Field>
-          <Field label="Short Description"><TextArea placeholder="Short Description" value={form.description} onChange={e=>setForm({...form, description:e.target.value})} /></Field>
-          <Field label="Upload Files" hint="PDF, DOCX, TXT, MD; max 10MB each">
-            <input type="file" multiple accept=".pdf,.doc,.docx,.txt,.md" onChange={e=>setFiles(Array.from(e.target.files||[]))} />
+      <div className={styles.projectCard}>
+        <div className={styles.projectHeader}>
+          <h2>{id ? '✏️ Edit Project' : '✨ Create New Project'}</h2>
+          <p>{id ? 'Update your project details and files' : 'Set up a new AI chat project with custom knowledge'}</p>
+        </div>
+        
+        <div className={styles.projectForm}>
+          <Field label="Project Name">
+            <Input 
+              placeholder="e.g., Customer Support Bot" 
+              value={form.name} 
+              onChange={e=>setForm({...form, name:e.target.value})}
+              required
+            />
           </Field>
+          
+          <Field label="Role" hint="Define the AI's role in this project">
+            <Input 
+              placeholder="e.g., Customer Support Agent" 
+              value={form.role} 
+              onChange={e=>setForm({...form, role:e.target.value})} 
+            />
+          </Field>
+          
+          <Field label="Responsibilities" hint="What should the AI help with?">
+            <TextArea 
+              placeholder="Describe the AI's responsibilities..." 
+              value={form.responsibilities} 
+              onChange={e=>setForm({...form, responsibilities:e.target.value})}
+            />
+          </Field>
+          
+          <Field label="Short Description" hint="Brief overview of the project">
+            <TextArea 
+              placeholder="Describe your project..." 
+              value={form.description} 
+              onChange={e=>setForm({...form, description:e.target.value})} 
+            />
+          </Field>
+          
+          <Field label="Upload Files" hint="PDF, DOCX, TXT, MD; max 10MB each">
+            <div className={styles.fileUploadArea}>
+              <div className={styles.uploadIcon}>📁</div>
+              <div className={styles.uploadText}>Choose files to upload</div>
+              <input 
+                type="file" 
+                multiple 
+                accept=".pdf,.doc,.docx,.txt,.md" 
+                onChange={e=>setFiles(Array.from(e.target.files||[]))} 
+              />
+            </div>
+          </Field>
+          
           {files.length > 0 && (
-            <div style={{ fontSize: 14, color: 'var(--muted)' }}>
-              {files.length} file(s) selected: {files.map(f=>f.name).join(', ')}
+            <div className={styles.selectedFiles}>
+              📎 {files.length} file(s) selected: {files.map(f=>f.name).join(', ')}
             </div>
           )}
 
           {id && existingFiles.length > 0 && (
-            <div className="card" style={{ background:'#fff', padding: 12 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Existing Files</div>
-              <div style={{ display:'flex', flexDirection:'column', gap: 8 }}>
+            <div className={styles.existingFilesCard}>
+              <div className={styles.cardTitle}>Existing Files</div>
+              <div className={styles.filesList}>
                 {existingFiles.map(f => (
-                  <div key={f.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                    <div style={{ overflow:'hidden', textOverflow:'ellipsis' }} title={f.filename}>{f.filename}</div>
-                    <div style={{ display:'flex', gap: 8 }}>
-                      <button className="btn" onClick={()=>deleteFile(f.id)} title="Delete">🗑️</button>
+                  <div key={f.id} className={styles.fileItem}>
+                    <div className={styles.fileName} title={f.filename}>
+                      📄 {f.filename}
                     </div>
+                    <button className="btn2" onClick={()=>deleteFile(f.id)} title="Delete">
+                      🗑️ Delete
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div style={{ display:'flex', justifyContent:'flex-end' }}>
+          <div className={styles.formActions}>
             <Button onClick={submit} disabled={submitting || !form.name.trim()}>
-              {submitting ? (id ? 'Saving…' : 'Creating…') : (id ? 'Save Changes' : 'Create Project')}
+              {submitting ? (id ? '💾 Saving…' : '✨ Creating…') : (id ? '💾 Save Changes' : '✨ Create Project')}
             </Button>
           </div>
         </div>

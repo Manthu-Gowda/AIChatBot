@@ -1,18 +1,166 @@
-/* Expose as CSS vars for easy theming */
+/* Design Tokens - Modern Orange/Peach Theme */
+
+/* Color System */
 :root {
-  --color-bg: #f6f7fb;
+  /* Brand Colors - Warm Orange/Peach */
+  --color-bg-soft: hsla(26, 92%, 91%, 0.4);
+  --color-grad-wash: linear-gradient(180deg, #ffa347 25%, hsla(0, 0%, 100%, 0.6) 80.76%);
+  --color-bg-base: rgb(243, 243, 243);
+  --color-accent: rgb(247, 126, 35);
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+
+  /* Extended Color Palette */
+  --color-bg: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 50%, #ffd4b3 100%);
   --color-surface: #ffffff;
   --color-surface-1: #ffffff;
-  --color-surface-2: #f1f5f9;
-  --color-text: #0f172a;
-  --muted: #64748b;
-  --color-primary: #4f46e5; /* indigo-600 */
-  --border: #e5e7eb;
+  --color-surface-2: #fff7f0;
+  --color-surface-hover: #fff0e5;
+  
+  --color-text: #1a1a1a;
+  --color-text-light: #4a4a4a;
+  --color-muted: #6b6b6b;
+  --color-muted-light: #9a9a9a;
+  
+  --color-primary: rgb(247, 126, 35);
+  --color-primary-light: #ffa347;
+  --color-primary-dark: #e57220;
+  --color-primary-gradient: linear-gradient(135deg, #ffa347 0%, rgb(247, 126, 35) 100%);
+  
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Borders & Dividers */
+  --border: #e8e8e8;
+  --border-light: #f0f0f0;
+  --border-focus: rgba(247, 126, 35, 0.4);
+
+  /* Border Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --shadow-sm: 0 1px 2px rgba(2,6,23,.05);
-  --shadow-md: 0 8px 24px rgba(2,6,23,.08);
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-accent: 0 8px 24px rgba(247, 126, 35, 0.15);
+  --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.12), 0 6px 12px rgba(0, 0, 0, 0.08);
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+
+  /* Typography */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-Index Scale */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
 }
 
-$font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+/* Font Family */
+$font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+/* Responsive Breakpoints */
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+/* Responsive Mixins */
+@mixin mobile {
+  @media (max-width: #{$breakpoint-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$breakpoint-sm}) and (max-width: #{$breakpoint-lg - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$breakpoint-lg}) {
+    @content;
+  }
+}
+
+@mixin desktop-xl {
+  @media (min-width: #{$breakpoint-xl}) {
+    @content;
+  }
+}
+
+/* Utility Mixins */
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin glass-effect {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

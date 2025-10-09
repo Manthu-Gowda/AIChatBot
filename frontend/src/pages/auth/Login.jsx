@@ -4,6 +4,7 @@ import { api, setToken } from '../../lib/api'
 import Button from '../../components/ui/Button'
 import { Field, Input } from '../../components/ui/Input'
 import Loader from '../../components/loader/Loader'
+import styles from './Auth.module.scss'
 
 export default function Login(){
   const [email, setEmail] = useState('')
@@ -12,6 +13,7 @@ export default function Login(){
   const nav = useNavigate()
   const loc = useLocation()
   const [loading, setLoading] = useState(false)
+  
   async function submit(e){
     e.preventDefault()
     setError('')
@@ -24,19 +26,48 @@ export default function Login(){
       setError(e.response?.data?.error?.message || 'Login failed')
     } finally { setLoading(false) }
   }
+
   return (
-    <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
+    <div className={styles.authContainer}>
       {loading && <Loader />}
-      <div className="card2" style={{ width: 380 }}>
-        <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Welcome back</div>
-        <form onSubmit={submit} className="col">
-          <Field label="Email"><Input placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} /></Field>
-          <Field label="Password"><Input placeholder="••••••••" type="password" value={password} onChange={e=>setPassword(e.target.value)} /></Field>
-          {error && <div style={{ color: 'crimson' }}>{error}</div>}
-          <Button type="submit">Continue</Button>
+      <div className={styles.authCard}>
+        <div className={styles.authHeader}>
+          <div className={styles.authLogo}>🔥</div>
+          <h1 className={styles.authTitle}>Welcome Back</h1>
+          <p className={styles.authSubtitle}>Sign in to continue to AI Chat</p>
+        </div>
+        
+        <form onSubmit={submit} className={styles.authForm}>
+          <Field label="Email Address">
+            <Input 
+              type="email"
+              placeholder="you@example.com" 
+              value={email} 
+              onChange={e=>setEmail(e.target.value)}
+              required
+            />
+          </Field>
+          
+          <Field label="Password">
+            <Input 
+              type="password"
+              placeholder="••••••••" 
+              value={password} 
+              onChange={e=>setPassword(e.target.value)}
+              required
+            />
+          </Field>
+          
+          {error && <div className={styles.errorMessage}>{error}</div>}
+          
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
         </form>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 13 }}>
-          <Link style={{textDecoration: 'none'}} to="/forgot">Forgot password?</Link>  <Link style={{textDecoration: 'none'}} to="/signup">Create account</Link>
+        
+        <div className={styles.authFooter}>
+          <Link to="/forgot">Forgot password?</Link>
+          <Link to="/signup">Create account</Link>
         </div>
       </div>
     </div>

@@ -1,6 +1,99 @@
-.msg { display:flex; gap:12px; margin: 8px 0; align-items:flex-start; }
-.avatar { width: 28px; height: 28px; border-radius: 999px; background: var(--color-surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--muted); }
-.bubble { padding: 14px 16px; border-radius: 16px; max-width: 900px; box-shadow: var(--shadow-sm); border:1px solid var(--border); }
-.user { background: #f8fafc; margin-left: auto; }
-.assistant { background: #fff; }
-.meta { font-size: 11px; color: var(--muted); margin-top: 6px; }
+@use '../../styles/_tokens.scss' as *;
+
+.msg {
+  display: flex;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+  align-items: flex-start;
+  animation: slideUp var(--transition-base);
+
+  @include mobile {
+    gap: var(--space-sm);
+    margin: var(--space-sm) 0;
+  }
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--font-size-sm);
+
+  @include mobile {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: var(--font-size-xs);
+  }
+}
+
+.bubble {
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  max-width: 85%;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: all var(--transition-fast);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  @include mobile {
+    padding: 12px 16px;
+    max-width: 90%;
+    border-radius: var(--radius-md);
+  }
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.user {
+  background: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 100%);
+  margin-left: auto;
+  border-color: rgba(247, 126, 35, 0.2);
+
+  .avatar {
+    background: var(--color-primary-gradient);
+  }
+}
+
+.assistant {
+  background: var(--color-surface);
+  
+  .avatar {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  }
+}
+
+.meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  margin-top: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+
+  @include mobile {
+    font-size: 10px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

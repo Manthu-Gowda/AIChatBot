@@ -1,15 +1,167 @@
-.markdown {
-  line-height: 1.6;
-  font-size: 15px;
-}
-.markdown h1, .markdown h2, .markdown h3 { margin: 14px 0 8px; }
-.markdown h1 { font-size: 1.6rem; }
-.markdown h2 { font-size: 1.3rem; }
-.markdown h3 { font-size: 1.15rem; }
-.markdown p { margin: 8px 0; }
-.markdown ul, .markdown ol { margin: 8px 0 8px 20px; }
-.markdown code { background: #f3f4f6; padding: 2px 5px; border-radius: 6px; }
-.markdown pre { position: relative; background: #0f172a; color: #e5e7eb; padding: 12px; border-radius: 10px; overflow: auto; }
-.copyBtn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.2); border-radius:8px; padding:4px 8px; font-size:12px; cursor:pointer; }
-.hr { border:0; border-top:1px solid var(--border); margin:12px 0; }
+@use '../../styles/_tokens.scss' as *;
 
+.markdown {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text);
+
+  @include mobile {
+    font-size: var(--font-size-sm);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-md);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text);
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  h1 { font-size: var(--font-size-2xl); }
+  h2 { font-size: var(--font-size-xl); }
+  h3 { font-size: var(--font-size-lg); }
+  h4 { font-size: var(--font-size-base); }
+  h5 { font-size: var(--font-size-sm); }
+  h6 { font-size: var(--font-size-sm); }
+
+  p {
+    margin-bottom: var(--space-md);
+    line-height: var(--line-height-relaxed);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--color-primary-dark);
+    }
+  }
+
+  ul, ol {
+    margin: var(--space-md) 0;
+    padding-left: var(--space-xl);
+
+    @include mobile {
+      padding-left: var(--space-lg);
+    }
+
+    li {
+      margin: var(--space-xs) 0;
+      line-height: var(--line-height-relaxed);
+    }
+  }
+
+  code {
+    background: var(--color-surface-2);
+    color: var(--color-primary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--color-surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    overflow-x: auto;
+    margin: var(--space-lg) 0;
+    box-shadow: var(--shadow-xs);
+
+    @include mobile {
+      padding: var(--space-md);
+      border-radius: var(--radius-sm);
+    }
+
+    code {
+      background: transparent;
+      color: var(--color-text);
+      padding: 0;
+      border: none;
+      font-size: var(--font-size-sm);
+
+      @include mobile {
+        font-size: var(--font-size-xs);
+      }
+    }
+  }
+
+  blockquote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--space-lg);
+    margin: var(--space-lg) 0;
+    color: var(--color-text-light);
+    font-style: italic;
+
+    @include mobile {
+      padding-left: var(--space-md);
+      border-left-width: 3px;
+    }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: var(--space-xl) 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-lg) 0;
+    font-size: var(--font-size-sm);
+    box-shadow: var(--shadow-xs);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+
+    @include mobile {
+      font-size: var(--font-size-xs);
+      display: block;
+      overflow-x: auto;
+    }
+
+    th, td {
+      padding: var(--space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+
+      @include mobile {
+        padding: var(--space-sm);
+      }
+    }
+
+    th {
+      background: var(--color-surface-2);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+    }
+
+    tbody tr {
+      transition: background var(--transition-fast);
+
+      &:hover {
+        background: var(--color-surface-2);
+      }
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    margin: var(--space-lg) 0;
+    box-shadow: var(--shadow-sm);
+  }
+}
