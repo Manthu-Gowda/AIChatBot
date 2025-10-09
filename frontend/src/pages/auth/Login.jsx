@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { api, setToken } from '../../lib/api'
 import Button from '../../components/ui/Button'
 import { Field, Input } from '../../components/ui/Input'
+import Loader from '../../components/loader/Loader'
 
 export default function Login(){
   const [email, setEmail] = useState('')
@@ -10,19 +11,22 @@ export default function Login(){
   const [error, setError] = useState('')
   const nav = useNavigate()
   const loc = useLocation()
+  const [loading, setLoading] = useState(false)
   async function submit(e){
     e.preventDefault()
     setError('')
     try {
+      setLoading(true)
       const { data } = await api.post('/auth/login', { email, password })
       setToken(data.token)
       nav(loc.state?.from?.pathname || '/chat')
     } catch (e) {
       setError(e.response?.data?.error?.message || 'Login failed')
-    }
+    } finally { setLoading(false) }
   }
   return (
     <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
+      {loading && <Loader />}
       <div className="card2" style={{ width: 380 }}>
         <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Welcome back</div>
         <form onSubmit={submit} className="col">

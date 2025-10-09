@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { api, setToken } from '../../lib/api'
 import Button from '../../components/ui/Button'
 import { Field, Input } from '../../components/ui/Input'
+import Loader from '../../components/loader/Loader'
 
 export default function Signup(){
   const [name, setName] = useState('')
@@ -10,20 +11,23 @@ export default function Signup(){
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const nav = useNavigate()
+  const [loading, setLoading] = useState(false)
   async function submit(e){
     e.preventDefault()
     setError('')
     if (!name.trim()) { setError('Please enter your full name'); return }
     try {
+      setLoading(true)
       const { data } = await api.post('/auth/signup', { name, email, password })
       setToken(data.token)
       nav('/')
     } catch (e) {
       setError(e.response?.data?.error?.message || 'Signup failed')
-    }
+    } finally { setLoading(false) }
   }
   return (
     <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
+      {loading && <Loader />}
       <div className="card2" style={{ width: 420 }}>
         <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Create account</div>
         <form onSubmit={submit} className="col">

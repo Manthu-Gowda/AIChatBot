@@ -4,6 +4,7 @@ import { api } from '../../lib/api'
 import AppLayout from '../../components/layout/AppLayout'
 import Button from '../../components/ui/Button'
 import { Field, Input, TextArea } from '../../components/ui/Input'
+import Loader from '../../components/loader/Loader'
 
 export default function NewProject(){
   const nav = useNavigate()
@@ -12,17 +13,19 @@ export default function NewProject(){
   const [files, setFiles] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [existingFiles, setExistingFiles] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(()=>{
     if (!id) return
     ;(async()=>{
       try {
+        setLoading(true)
         const { data } = await api.get('/projects/'+id)
         if (data){
           setForm({ name: data.name||'', role: data.role||'', responsibilities: data.responsibilities||'', description: data.description||'' })
           setExistingFiles(Array.isArray(data.files) ? data.files : [])
         }
-      } catch {}
+      } catch {} finally { setLoading(false) }
     })()
   }, [id])
 
@@ -63,6 +66,7 @@ export default function NewProject(){
 
   return (
     <AppLayout title={id ? 'Edit Project' : 'New Project'}>
+      {(loading || submitting) && <Loader />}
       <div className="card" style={{ maxWidth: 840 }}>
         <div className="col" style={{ gap: 16 }}>
           <Field label="Project Name"><Input placeholder="Project Name" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} /></Field>
@@ -104,4 +108,3 @@ export default function NewProject(){
     </AppLayout>
   )
 }
-

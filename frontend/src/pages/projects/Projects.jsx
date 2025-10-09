@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppLayout from '../../components/layout/AppLayout'
 import Button from '../../components/ui/Button'
+import Loader from '../../components/loader/Loader'
 import { api } from '../../lib/api'
 import { getBackendBaseUrl } from '../../lib/baseUrl'
 import { FaEdit } from "react-icons/fa";
@@ -51,10 +52,9 @@ export default function Projects(){
 
   return (
     <AppLayout title="Projects" right={<Button onClick={()=>nav('/projects/new')}>Create Project</Button>}>
+      {loading && <Loader />}
       <div className="card" style={{ background:'#fff', padding:0 }}>
-        {loading ? (
-          <div style={{ padding:12 }}>Loading…</div>
-        ) : err ? (
+        {err ? (
           <div style={{ padding:12, color:'crimson' }}>{err}</div>
         ) : (
           <table style={{ width:'100%', borderCollapse:'collapse' }}>

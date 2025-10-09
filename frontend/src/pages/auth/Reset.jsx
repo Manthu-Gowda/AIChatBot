@@ -2,23 +2,27 @@ import { useState } from 'react'
 import { api } from '../../lib/api'
 import Button from '../../components/ui/Button'
 import { Field, Input } from '../../components/ui/Input'
+import Loader from '../../components/loader/Loader'
 
 export default function Reset(){
   const [token, setToken] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
+  const [loading, setLoading] = useState(false)
   async function submit(e){
     e.preventDefault()
     setMsg('')
     try {
+      setLoading(true)
       await api.post('/auth/reset', { token, password })
       setMsg('Password reset! You can now log in.')
     } catch (e) {
       setMsg(e.response?.data?.error?.message || 'Reset failed')
-    }
+    } finally { setLoading(false) }
   }
   return (
     <div style={{ display:'grid', placeItems:'center', height:'100%', padding:16 }}>
+      {loading && <Loader />}
       <div className="card2" style={{ width: 520 }}>
         <div style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Reset Password</div>
         <form onSubmit={submit} className="col">

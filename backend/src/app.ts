@@ -121,23 +121,17 @@ if (isProd) {
   // Serve static files from the frontend build directory
   app.use(express.static(FRONTEND_DIST))
 
-  // Catch-all route to serve the frontend's index.html for client-side routing.
-  // Exclude API and widget paths so they are handled by their routes above.
+  // HTML catch‑all for SPA routes: if the client is requesting an HTML page,
+  // serve index.html and let the frontend router handle it. API/stream requests
+  // (Accept not including text/html) fall through to backend routes below.
   app.get('*', (req, res, next) => {
-    const p = req.path
-    if (
-      p.startsWith('/auth') ||
-      p.startsWith('/me') ||
-      p.startsWith('/settings') ||
-      p.startsWith('/projects') ||
-      p.startsWith('/folders') ||
-      p.startsWith('/chat') ||
-      p.startsWith('/widget') ||
-      p.startsWith('/widget.js')
-    ) {
-      return next()
+    const accept = String(req.headers.accept || '')
+    if (req.method === 'GET' && accept.includes('text/html')) {
+      // Allow cross-origin embedding when used as widget
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+      return res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
     }
-    return res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
+    return next()
   })
 }
 // Routes

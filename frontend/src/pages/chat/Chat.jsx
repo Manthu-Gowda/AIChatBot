@@ -173,14 +173,19 @@ export default function Chat() {
             gap: 12,
           }}
         >
-          {list.map((m, i) => (
-            <Message
-              key={i}
-              role={m.role}
-              content={m.content}
-              ts={m.ts || Date.now()}
-            />
-          ))}
+          {list.map((m, i) => {
+            const isLast = i === list.length - 1
+            const showTyping = isLast && m.role === 'assistant' && pending && !m.content
+            return (
+              <Message
+                key={i}
+                role={m.role}
+                content={m.content}
+                ts={m.ts || Date.now()}
+                typing={showTyping}
+              />
+            )
+          })}
         </div>
         <div
           style={{

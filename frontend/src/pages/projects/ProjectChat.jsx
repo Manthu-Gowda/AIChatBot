@@ -62,7 +62,11 @@ export default function ProjectChat(){
       </div>
       <div className="card" style={{ height: 'calc(100vh - 300px)', background:'#fff', padding:0, display:'flex', flexDirection:'column' }}>
         <div ref={listRef} style={{ flex:1, overflow:'auto', padding:12, display:'flex', flexDirection:'column', gap:12 }}>
-          {list.map((m,i)=> <Message key={i} role={m.role} content={m.content} ts={m.ts || Date.now()} />)}
+          {list.map((m,i)=> {
+            const isLast = i === list.length - 1
+            const showTyping = isLast && m.role === 'assistant' && pending && !m.content
+            return <Message key={i} role={m.role} content={m.content} ts={m.ts || Date.now()} typing={showTyping} />
+          })}
         </div>
         <div style={{ background:'#fff', borderTop:'1px solid var(--border)', padding:12 }}>
           <div style={{ display:'flex', gap:12, alignItems:'flex-end' }}>

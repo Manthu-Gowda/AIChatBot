@@ -3,24 +3,29 @@ import { api } from '../../lib/api'
 import AppLayout from '../../components/layout/AppLayout'
 import Button from '../../components/ui/Button'
 import { Field, Input, Select } from '../../components/ui/Input'
+import Loader from '../../components/loader/Loader'
 
 export default function General(){
   const [defaultProvider, setDefaultProvider] = useState('OPENAI')
   const [apiKeys, setApiKeys] = useState({ openai: '', deepseek:'', gemini:'', perplexity:'' })
   const [msg, setMsg] = useState('')
+  const [loading, setLoading] = useState(false)
   useEffect(()=>{ (async()=>{
-    try { const { data } = await api.get('/settings'); if (data){ setDefaultProvider(data.defaultProvider); setApiKeys({ openai: data.apiKeys?.openai || '', deepseek: data.apiKeys?.deepseek || '', gemini: data.apiKeys?.gemini || '', perplexity: data.apiKeys?.perplexity || '' }) } }
-    catch {}
+    try { setLoading(true); const { data } = await api.get('/settings'); if (data){ setDefaultProvider(data.defaultProvider); setApiKeys({ openai: data.apiKeys?.openai || '', deepseek: data.apiKeys?.deepseek || '', gemini: data.apiKeys?.gemini || '', perplexity: data.apiKeys?.perplexity || '' }) } }
+    catch {} finally { setLoading(false) }
   })() },[])
   async function submit(){
     setMsg('')
+    setLoading(true)
     const keys = { ...apiKeys }
     Object.keys(keys).forEach(k=>{ if (keys[k] && keys[k].startsWith('sk-****')) keys[k] = undefined })
     await api.put('/settings', { defaultProvider, apiKeys: keys })
     setMsg('Settings saved')
+    setLoading(false)
   }
   return (
     <AppLayout title="General Settings">
+      {loading && <Loader />}
       <div className="card" style={{ maxWidth: 720 }}>
         <div className="col">
           <Field label="Default Provider">

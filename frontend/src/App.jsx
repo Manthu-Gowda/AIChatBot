@@ -53,6 +53,7 @@ function WidgetLayout() {
   const projectId = new URLSearchParams(window.location.search).get('projectId')
   const [msg, setMsg] = useState('')
   const [list, setList] = useState([])
+  const [pending, setPending] = useState(false)
   const listRef = useRef(null)
   useEffect(()=>{ listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior:'smooth' }) }, [list])
 
@@ -61,13 +62,16 @@ function WidgetLayout() {
     const { getBackendBaseUrl } = await import('./lib/baseUrl')
     const base = getBackendBaseUrl()
     setList((l) => [...l, { role: 'user', content: msg, ts: Date.now() }, { role: 'assistant', content: '', ts: Date.now() }])
+    setPending(true)
     const res = await fetch(base + '/widget/chat?stream=1', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' },
       body: JSON.stringify({ message: msg, projectId })
     })
     if (!res.ok) {
       setList((l)=>{ const copy=[...l]; const idx=copy.length-1; copy[idx] = { ...copy[idx], content: 'Request failed' }; return copy })
-      return setMsg('')
+      setMsg('')
+      setPending(false)
+      return
     }
     const reader = res.body.getReader(); const decoder = new TextDecoder(); let buffer=''
     const append = (t)=>{ setList((l)=>{ const copy=[...l]; const idx=copy.length-1; copy[idx] = { ...copy[idx], content: (copy[idx].content||'') + t }; return copy }) }
@@ -82,6 +86,7 @@ function WidgetLayout() {
       }
     }
     setMsg('')
+    setPending(false)
   }
 
   return (
@@ -91,9 +96,13 @@ function WidgetLayout() {
       </div>
       <div className="card" style={{ flex:1, display:'flex', flexDirection:'column', background:'#fff', padding:0 }}>
         <div ref={listRef} style={{ flex:1, overflow:'auto', padding:12, display:'flex', flexDirection:'column', gap:12 }}>
-          {list.map((m,i)=> (
-            <Message key={i} role={m.role} content={m.content} ts={m.ts || Date.now()} />
-          ))}
+          {list.map((m,i)=> {
+            const isLast = i === list.length - 1
+            const showTyping = isLast && m.role === 'assistant' && pending && !m.content
+            return (
+              <Message key={i} role={m.role} content={m.content} ts={m.ts || Date.now()} typing={showTyping} />
+            )
+          })}
         </div>
         <div style={{ background:'#fff', borderTop:'1px solid var(--border)', padding:12 }}>
           <div style={{ display:'flex', gap:12, alignItems:'flex-end' }}>
