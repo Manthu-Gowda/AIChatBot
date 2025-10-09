@@ -105,7 +105,7 @@ function WidgetLayout() {
           })}
         </div>
         <div style={{ background:'#fff', borderTop:'1px solid var(--border)', padding:12 }}>
-          <div style={{ display:'flex', gap:12, alignItems:'flex-end' }}>
+          <div>
             <TextArea value={msg} onChange={(e)=>setMsg(e.target.value)} placeholder="Type your message..." style={{ flex: 1, height: 80 }} onKeyDown={(e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send() } }} />
             <Button onClick={send}>Send</Button>
           </div>

@@ -40,12 +40,13 @@ export default function AppLayout({ title, right, children }){
           <Link className={styles.link} to="/projects" onClick={closeMobileMenu}>
             📁 Projects
           </Link>
-          <Link className={styles.link} to="/settings/profile" onClick={closeMobileMenu}>
-            👤 Profile Settings
-          </Link>
+        
         </nav>
         <div className={styles.sidebarFooter}>
-          <div className={styles.version}>v0.1.0</div>
+          {/* <div className={styles.version}>v0.1.0</div> */}
+            <Link className={styles.link} to="/settings/profile" onClick={closeMobileMenu}>
+            👤 Profile Settings
+          </Link>
           <button onClick={logout} className={styles.logoutButton}>
             Logout
           </button>
@@ -65,7 +66,7 @@ export default function AppLayout({ title, right, children }){
             </button>
             <span>{title || ''}</span>
           </div>
-          <div>{right || <Button variant="ghost" onClick={logout}>Logout</Button>}</div>
+          {/* <div>{right || <Button variant="ghost" onClick={logout}>Logout</Button>}</div> */}
         </div>
         <main className={styles.main}>{children}</main>
       </section>

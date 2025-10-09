@@ -37,14 +37,74 @@ export default function FloatingWidget(){
   return (
     <>
       {/* Floating button */}
-      <button onClick={openWidget} style={{ cursor: 'pointer', position:'fixed', right:10, bottom:5, borderRadius:999, padding:'6px 10px', background:'lightgrey', color:'#fff', border:0, boxShadow:'var(--shadow-md)', fontSize:"16px", zIndex:2147483647 }}>🤖</button>
+      <button 
+        onClick={openWidget} 
+        style={{ 
+          cursor: 'pointer', 
+          position: 'fixed', 
+          right: 10, 
+          bottom: 10, 
+          borderRadius: '50%', 
+          width: '50px',
+          height: '50px',
+          padding: 0,
+          background: 'linear-gradient(135deg, #ffa347 0%, rgb(247, 126, 35) 100%)', 
+          color: '#fff', 
+          border: 0, 
+          boxShadow: '0 8px 24px rgba(247, 126, 35, 0.3)',
+          fontSize: '28px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'all 0.3s ease',
+          zIndex: 2147483647
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)'
+          e.currentTarget.style.boxShadow = '0 12px 32px rgba(247, 126, 35, 0.4)'
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.transform = 'scale(1)'
+          e.currentTarget.style.boxShadow = '0 8px 24px rgba(247, 126, 35, 0.3)'
+        }}
+      >
+        🤖
+      </button>
 
       {/* Overlay + iframe */}
       {open && (
-        <div onClick={()=>setOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.35)', zIndex:2147483646 }} />
+        <div 
+          onClick={()=>setOpen(false)} 
+          style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: 'rgba(0,0,0,.5)', 
+            backdropFilter: 'blur(4px)',
+            zIndex: 2147483646,
+            animation: 'fadeIn 0.2s ease'
+          }} 
+        />
       )}
       {open && (
-        <iframe title="AI Chat Widget" src={src} style={{ width:'380px', height:'520px', position:'fixed', right:20, bottom:70, border:0, borderRadius:12, boxShadow:'0 20px 40px rgba(0,0,0,.2)', zIndex:2147483647, background:'#fff' }} />
+        <iframe 
+          title="AI Chat Widget" 
+          src={src} 
+          style={{ 
+            width: '420px', 
+            height: '600px', 
+            maxWidth: 'calc(100vw - 40px)',
+            maxHeight: 'calc(100vh - 100px)',
+            position: 'fixed', 
+            right: 20, 
+            bottom: 100, 
+            border: '2px solid var(--border)', 
+            borderRadius: '16px', 
+            boxShadow: '0 20px 60px rgba(0,0,0,.25)', 
+            zIndex: 2147483647, 
+            background: '#fff',
+            animation: 'slideUp 0.3s ease'
+          }} 
+        />
       )}
     </>
   )
