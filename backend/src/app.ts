@@ -91,7 +91,9 @@ app.use(
       if (allowedOrigins.has(origin)) return cb(null, true)
       return cb(new Error('CORS blocked'), false)
     },
+    // Allow credentials and common auth header so browsers can send Authorization
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 )
 
