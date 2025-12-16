@@ -163,7 +163,7 @@ app.use('/chat', chatLimiter, chatRoutes)
 app.use('/widget', widgetRoutes)
 app.use('/config', configRoutes)
 
-// Widget layout
+// Widget layout (Allows iframe embedding)
 app.get(['/widget-layout', '/widget'], (req, res) => {
   const q = new URLSearchParams(req.query as any).toString()
   if (isProd) {
