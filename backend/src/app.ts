@@ -50,7 +50,16 @@ const app = express()
 // overly restrictive (default-src 'none') and block DevTools/.well-known
 // requests. Keep CSP enabled in production.
 if (process.env.NODE_ENV === 'production') {
-  app.use(helmet())
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "img-src": ["'self'", "data:", "https:", "blob:"],
+        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
+        "connect-src": ["'self'", "https:", "wss:"], // Allow WebSocket if needed
+      },
+    },
+  }))
 } else {
   app.use(helmet({ contentSecurityPolicy: false }))
 }

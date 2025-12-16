@@ -65,7 +65,7 @@ function WidgetLayout() {
     setPending(true)
     const res = await fetch(base + '/widget/chat?stream=1', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' },
-      body: JSON.stringify({ message: msg, projectId: "694101fff7c8ce71eee6d548" })
+      body: JSON.stringify({ message: msg, projectId: projectId })
     })
     if (!res.ok) {
       setList((l) => { const copy = [...l]; const idx = copy.length - 1; copy[idx] = { ...copy[idx], content: 'Request failed' }; return copy })
