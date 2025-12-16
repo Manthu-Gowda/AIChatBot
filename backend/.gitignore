@@ -9,8 +9,7 @@ build/
 *.tsbuildinfo
 
 # Environment variables
-.env
-.env.*
+# (tracked in repo now by user request; keep secrets out of source)
 
 # Logs
 logs/

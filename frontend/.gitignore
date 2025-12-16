@@ -8,8 +8,7 @@ node_modules/
 .vite/
 
 # Environment variables
-.env
-.env.*
+# (tracked in repo now by user request; keep secrets out of source)
 
 # Local dev files
 npm-debug.log*
