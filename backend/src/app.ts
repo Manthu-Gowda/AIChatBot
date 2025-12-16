@@ -176,7 +176,11 @@ app.get(['/widget-layout', '/widget'], (req, res) => {
     if (WIDGET_ALLOWED_ORIGINS.length > 0) {
       const fa = ["'self'", ...WIDGET_ALLOWED_ORIGINS].join(' ')
       res.setHeader('Content-Security-Policy', `frame-ancestors ${fa}`)
+      console.log('[Widget] CSP Set:', `frame-ancestors ${fa}`)
+    } else {
+      console.log('[Widget] No WIDGET_ALLOWED_ORIGINS configured, no frame-ancestors set')
     }
+    console.log('[Widget] Origins Configured:', WIDGET_ALLOWED_ORIGINS)
     return res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
   }
   const url = `${FRONTEND_URL}/widget-layout${q ? `?${q}` : ''}`
