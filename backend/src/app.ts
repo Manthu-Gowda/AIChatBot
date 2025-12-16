@@ -171,16 +171,22 @@ app.get(['/widget-layout', '/widget'], (req, res) => {
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
     // Allow embedding in iframes from other origins (widget use-case)
     res.removeHeader('X-Frame-Options')
-    // Loosen CSP frame-ancestors specifically for widget layout
+    // Loosen CSP frame-ancestors specifically for widget layout.
+    // Always compute a frame-ancestors value including the current Render URL
+    // and any configured WIDGET_ALLOWED_ORIGINS so hosts embedding the widget
+    // are explicitly allowed.
     res.removeHeader('Content-Security-Policy')
-    if (WIDGET_ALLOWED_ORIGINS.length > 0) {
-      const fa = ["'self'", ...WIDGET_ALLOWED_ORIGINS].join(' ')
+    const faParts = ["'self'"]
+    if (RENDER_EXTERNAL_URL) faParts.push(RENDER_EXTERNAL_URL)
+    if (WIDGET_ALLOWED_ORIGINS.length > 0) faParts.push(...WIDGET_ALLOWED_ORIGINS)
+    const fa = faParts.filter(Boolean).join(' ')
+    if (faParts.length > 0) {
       res.setHeader('Content-Security-Policy', `frame-ancestors ${fa}`)
       console.log('[Widget] CSP Set:', `frame-ancestors ${fa}`)
     } else {
-      console.log('[Widget] No WIDGET_ALLOWED_ORIGINS configured, no frame-ancestors set')
+      console.log('[Widget] No origins configured for frame-ancestors; leaving CSP unset')
     }
-    console.log('[Widget] Origins Configured:', WIDGET_ALLOWED_ORIGINS)
+    console.log('[Widget] Origins Configured:', faParts)
     return res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
   }
   const url = `${FRONTEND_URL}/widget-layout${q ? `?${q}` : ''}`
