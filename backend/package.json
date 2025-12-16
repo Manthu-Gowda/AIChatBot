@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "build": "npx prisma generate && tsc -p .",
-    "start": "node dist/src/app.js",
+    "start": "node scripts/start.js",
     "prisma:push": "prisma db push",
     "prisma:generate": "prisma generate",
     "test": "jest --runInBand"

@@ -29,5 +29,9 @@ services:
         sync: false
       - key: ENCRYPTION_KEY
         sync: false
-      # - key: WIDGET_ALLOWED_ORIGINS
-      #   value: https://your-site.example
+      - key: WIDGET_ALLOWED_ORIGINS
+        sync: false
+      - key: AUTO_MIGRATE
+        value: "true"
+      - key: MIGRATION_STRATEGY
+        value: deploy
