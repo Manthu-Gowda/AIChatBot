@@ -36,21 +36,45 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
     const tenantId = req.user!.id
     const projectId = bodyProjectId || req.projectId
     const settings = await prisma.settings.findUnique({ where: { userId: tenantId } })
-    const provider = (providerOverride || settings?.defaultProvider || 'OPENAI') as any
+    
+    let provider = (providerOverride || settings?.defaultProvider || 'GEMINI') as any
     let keyEnc: string | null = null
-    switch (provider) {
-      case 'OPENAI': keyEnc = settings?.openaiKeyEnc ?? null; break
-      case 'DEEPSEEK': keyEnc = settings?.deepseekKeyEnc ?? null; break
-      case 'GEMINI': keyEnc = settings?.geminiKeyEnc ?? null; break
-      case 'PERPLEXITY': keyEnc = settings?.perplexityKeyEnc ?? null; break
-      case 'ANTHROPIC': keyEnc = settings?.anthropicKeyEnc ?? null; break
-      case 'MISTRAL': keyEnc = settings?.mistralKeyEnc ?? null; break
-      case 'OPENROUTER': keyEnc = settings?.openrouterKeyEnc ?? null; break
-      case 'GROQ': keyEnc = settings?.groqKeyEnc ?? null; break
+
+    // Project-based config (Priority)
+    if (projectId) {
+      const project = await prisma.project.findFirst({ where: { id: projectId, userId: tenantId } })
+      if (project && (project as any).provider) {
+        provider = (project as any).provider
+        keyEnc = (project as any).apiKeyEnc
+      }
+    }
+
+    // Fallback to settings (only if project didn't provide a key?) 
+    // If project loaded but had no key, keyEnc is null/undefined. 
+    // If we want STRICT project config, we stop here.
+    // If we want fallback, we check settings. 
+    // Given the requirement "User particular Project API only", we should probably NOT fallback if project is defined.
+    // However, for safety if key is missing in project, maybe fallback? 
+    // Let's assume strict for now to match chat.ts logic.
+    
+    if (!keyEnc && !projectId) {
+        // Only check global settings if NOT using a project-specific config (or if project lookup failed?)
+        // But logic above tries project first. 
+        // Let's keep the switch as fallback for backward compatibility if projectId is missing.
+        switch (provider) {
+        case 'OPENAI': keyEnc = settings?.openaiKeyEnc ?? null; break
+        case 'DEEPSEEK': keyEnc = settings?.deepseekKeyEnc ?? null; break
+        case 'GEMINI': keyEnc = settings?.geminiKeyEnc ?? null; break
+        case 'PERPLEXITY': keyEnc = settings?.perplexityKeyEnc ?? null; break
+        case 'ANTHROPIC': keyEnc = settings?.anthropicKeyEnc ?? null; break
+        case 'MISTRAL': keyEnc = settings?.mistralKeyEnc ?? null; break
+        case 'OPENROUTER': keyEnc = settings?.openrouterKeyEnc ?? null; break
+        case 'GROQ': keyEnc = settings?.groqKeyEnc ?? null; break
+        }
     }
     if (!keyEnc) return res.status(400).json({ error: { message: 'Missing API key', provider } })
     let apiKey: string
-    try { apiKey = decrypt(keyEnc) }
+    try { apiKey = decrypt(keyEnc).trim() }
     catch { return res.status(400).json({ error: { message: 'Unable to decrypt stored API key. ENCRYPTION_KEY likely changed. Please re-enter the provider API key.' }, provider }) }
 
     let systemPrompt: string | undefined

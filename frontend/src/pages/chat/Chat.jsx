@@ -22,10 +22,6 @@ export default function Chat() {
         const { data } = await api.get("/projects");
         setProjects(data);
       } catch { }
-      try {
-        const { data } = await api.get("/settings");
-        if (data?.defaultProvider) setProvider(data.defaultProvider);
-      } catch { }
     })();
   }, []);
 
@@ -54,7 +50,7 @@ export default function Chat() {
         },
         body: JSON.stringify({
           message: userText,
-          provider,
+          // provider, // No longer sending provider override
           projectId: projectId || undefined,
           conversationId: convId || undefined,
         }),
@@ -124,19 +120,7 @@ export default function Chat() {
   return (
     <AppLayout title="Chat">
       <div className={styles.chatControls}>
-        <div className={styles.controlGroup}>
-          <label>Provider</label>
-          <Select value={provider} onChange={(e) => setProvider(e.target.value)}>
-            <option>OPENAI</option>
-            <option>DEEPSEEK</option>
-            <option>GEMINI</option>
-            <option>PERPLEXITY</option>
-            <option>ANTHROPIC</option>
-            <option>MISTRAL</option>
-            <option>OPENROUTER</option>
-            <option>GROQ</option>
-          </Select>
-        </div>
+        {/* Provider dropdown removed */}
         <div className={styles.controlGroup}>
           <label>Project</label>
           <Select

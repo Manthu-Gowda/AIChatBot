@@ -9,8 +9,8 @@ services:
       npm install --prefix frontend
       npm run build --prefix frontend
       npm run build --prefix backend
+      npm run prisma:push --prefix backend
     startCommand: npm run start --prefix backend
-    postDeployCommand: npm run prisma:push --prefix backend
     envVars:
       - key: NODE_VERSION
         value: 18

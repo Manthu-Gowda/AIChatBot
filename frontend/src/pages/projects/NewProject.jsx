@@ -3,49 +3,61 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../../lib/api'
 import AppLayout from '../../components/layout/AppLayout'
 import Button from '../../components/ui/Button'
-import { Field, Input, TextArea } from '../../components/ui/Input'
+import { Field, Input, TextArea, Select } from '../../components/ui/Input'
 import Loader from '../../components/loader/Loader'
 import styles from './NewProject.module.scss'
 
-export default function NewProject(){
+export default function NewProject() {
   const nav = useNavigate()
   const { id } = useParams()
-  const [form, setForm] = useState({ name:'', role:'', responsibilities:'', description:'', websiteUrl:'' })
+  const [form, setForm] = useState({ name: '', role: '', responsibilities: '', description: '', websiteUrl: '', provider: 'GEMINI', apiKey: '' })
+  const [providers, setProviders] = useState([])
   const [files, setFiles] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [existingFiles, setExistingFiles] = useState([])
   const [loading, setLoading] = useState(false)
 
-  useEffect(()=>{
+  useEffect(() => {
+    // Fetch providers
+    api.get('/config/providers').then(({ data }) => setProviders(data)).catch(() => { })
+
     if (!id) return
-    ;(async()=>{
-      try {
-        setLoading(true)
-        const { data } = await api.get('/projects/'+id)
-        if (data){
-          setForm({ name: data.name||'', role: data.role||'', responsibilities: data.responsibilities||'', description: data.description||'', websiteUrl: data.websiteUrl||'' })
-          setExistingFiles(Array.isArray(data.files) ? data.files : [])
-        }
-      } catch {} finally { setLoading(false) }
-    })()
+      ; (async () => {
+        try {
+          setLoading(true)
+          const { data } = await api.get('/projects/' + id)
+          if (data) {
+            setForm({
+              name: data.name || '',
+              role: data.role || '',
+              responsibilities: data.responsibilities || '',
+              description: data.description || '',
+              websiteUrl: data.websiteUrl || '',
+              provider: data.provider || 'GEMINI',
+              apiKey: data.apiKey || '' // If masked, placeholder? User can overwrite.
+            })
+            setExistingFiles(Array.isArray(data.files) ? data.files : [])
+          }
+        } catch { } finally { setLoading(false) }
+      })()
   }, [id])
 
-  async function deleteFile(fileId){
+  async function deleteFile(fileId) {
     if (!id) return
     if (!confirm('Delete this file from the project?')) return
     try {
       await api.delete(`/projects/${id}/files/${fileId}`)
-      setExistingFiles((list)=> list.filter(f=>f.id !== fileId))
-    } catch (e){ alert(e?.message || 'Failed to delete file') }
+      setExistingFiles((list) => list.filter(f => f.id !== fileId))
+    } catch (e) { alert(e?.message || 'Failed to delete file') }
   }
 
-  async function submit(){
+  async function submit() {
     if (!form.name.trim()) return
     setSubmitting(true)
     try {
       if (id) {
-        const { data } = await api.put('/projects/'+id, form)
-        if (files.length){
+        const { data } = await api.put('/projects/' + id, form)
+        if (files.length) {
           const fd = new FormData()
           for (const f of files) fd.append('files', f)
           await api.post(`/projects/${data.id}/files`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -53,7 +65,7 @@ export default function NewProject(){
         nav(`/projects/${data.id}/chat`)
       } else {
         const { data } = await api.post('/projects', form)
-        if (files.length){
+        if (files.length) {
           const fd = new FormData()
           for (const f of files) fd.append('files', f)
           await api.post(`/projects/${data.id}/files`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -73,65 +85,89 @@ export default function NewProject(){
           <h2>{id ? '✏️ Edit Project' : '✨ Create New Project'}</h2>
           <p>{id ? 'Update your project details and files' : 'Set up a new AI chat project with custom knowledge'}</p>
         </div>
-        
+
         <div className={styles.projectForm}>
           <Field label="Project Name">
-            <Input 
-              placeholder="e.g., Customer Support Bot" 
-              value={form.name} 
-              onChange={e=>setForm({...form, name:e.target.value})}
+            <Input
+              placeholder="e.g., Customer Support Bot"
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
               required
             />
           </Field>
-          
+
           <Field label="Role" hint="Define the AI's role in this project">
-            <Input 
-              placeholder="e.g., Customer Support Agent" 
-              value={form.role} 
-              onChange={e=>setForm({...form, role:e.target.value})} 
+            <Input
+              placeholder="e.g., Customer Support Agent"
+              value={form.role}
+              onChange={e => setForm({ ...form, role: e.target.value })}
             />
           </Field>
-          
+
           <Field label="Website URL (Optional)" hint="We will scrape this site for project context">
-            <Input 
-              placeholder="https://example.com/docs" 
-              value={form.websiteUrl} 
-              onChange={e=>setForm({...form, websiteUrl:e.target.value})}
+            <Input
+              placeholder="https://example.com/docs"
+              value={form.websiteUrl}
+              onChange={e => setForm({ ...form, websiteUrl: e.target.value })}
+            />
+          </Field>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label="AI Provider" hint="Select the AI model for this project">
+              <Select value={form.provider} onChange={e => setForm({ ...form, provider: e.target.value })}>
+                {providers.map(p => <option key={p} value={p}>{p}</option>)}
+              </Select>
+            </Field>
+            <Field label="API Key" hint={id && form.apiKey.includes('sk-') ? 'Key is set (masked)' : 'Enter API Key for this project'}>
+              <Input
+                type="password"
+                placeholder={id && !form.apiKey ? "Enter new key to update..." : "sk-..."}
+                value={form.apiKey}
+                onChange={e => setForm({ ...form, apiKey: e.target.value })}
+              />
+            </Field>
+          </div>
+
+          <Field label="Website URL (Optional)" hint="We will scrape this site for project context">
+            <Input
+              placeholder="https://example.com/docs"
+              value={form.websiteUrl}
+              onChange={e => setForm({ ...form, websiteUrl: e.target.value })}
             />
           </Field>
 
           <Field label="Responsibilities" hint="What should the AI help with?">
-            <TextArea 
-              placeholder="Describe the AI's responsibilities..." 
-              value={form.responsibilities} 
-              onChange={e=>setForm({...form, responsibilities:e.target.value})}
+            <TextArea
+              placeholder="Describe the AI's responsibilities..."
+              value={form.responsibilities}
+              onChange={e => setForm({ ...form, responsibilities: e.target.value })}
             />
           </Field>
-          
+
           <Field label="Short Description" hint="Brief overview of the project">
-            <TextArea 
-              placeholder="Describe your project..." 
-              value={form.description} 
-              onChange={e=>setForm({...form, description:e.target.value})} 
+            <TextArea
+              placeholder="Describe your project..."
+              value={form.description}
+              onChange={e => setForm({ ...form, description: e.target.value })}
             />
           </Field>
-          
+
           <Field label="Upload Files" hint="PDF, DOCX, TXT, MD; max 10MB each">
             <div className={styles.fileUploadArea}>
               <div className={styles.uploadIcon}>📁</div>
               <div className={styles.uploadText}>Choose files to upload</div>
-              <input 
-                type="file" 
-                multiple 
-                accept=".pdf,.doc,.docx,.txt,.md" 
-                onChange={e=>setFiles(Array.from(e.target.files||[]))} 
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.txt,.md"
+                onChange={e => setFiles(Array.from(e.target.files || []))}
               />
             </div>
           </Field>
-          
+
           {files.length > 0 && (
             <div className={styles.selectedFiles}>
-              📎 {files.length} file(s) selected: {files.map(f=>f.name).join(', ')}
+              📎 {files.length} file(s) selected: {files.map(f => f.name).join(', ')}
             </div>
           )}
 
@@ -144,7 +180,7 @@ export default function NewProject(){
                     <div className={styles.fileName} title={f.filename}>
                       📄 {f.filename}
                     </div>
-                    <button className="btn2" onClick={()=>deleteFile(f.id)} title="Delete">
+                    <button className="btn2" onClick={() => deleteFile(f.id)} title="Delete">
                       🗑️ Delete
                     </button>
                   </div>

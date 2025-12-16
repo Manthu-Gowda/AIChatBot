@@ -12,6 +12,7 @@ import projectRoutes from './routes/projects'
 import folderRoutes from './routes/folders'
 import chatRoutes from './routes/chat'
 import widgetRoutes from './routes/widget'
+import configRoutes from './routes/config'
 import { authLimiter, chatLimiter } from './middleware/rateLimit'
 import { errorHandler } from './middleware/error'
 
@@ -84,18 +85,25 @@ const allowedOrigins = new Set([
   ...WIDGET_ALLOWED_ORIGINS,
 ].filter(Boolean))
 
-app.use(
+app.use((req, res, next) => {
   cors({
     origin: function (origin, cb) {
+      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return cb(null, true)
+      
+      // Always allow widget routes
+      if (req.path.startsWith('/widget')) {
+        return cb(null, true)
+      }
+
+      // Check allowed origins for other routes
       if (allowedOrigins.has(origin)) return cb(null, true)
       return cb(new Error('CORS blocked'), false)
     },
-    // Allow credentials and common auth header so browsers can send Authorization
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-)
+  })(req, res, next)
+})
 
 // Static widget assets: serve the single widget.js file directly (robust path resolution)
 function resolveWidgetScript(): string {
@@ -144,6 +152,7 @@ app.use('/projects', projectRoutes)
 app.use('/folders', folderRoutes)
 app.use('/chat', chatLimiter, chatRoutes)
 app.use('/widget', widgetRoutes)
+app.use('/config', configRoutes)
 
 // Widget layout
 app.get(['/widget-layout', '/widget'], (req, res) => {

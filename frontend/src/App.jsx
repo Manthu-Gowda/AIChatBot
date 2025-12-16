@@ -36,7 +36,7 @@ export default function App() {
       <Route path="/reset" element={<Reset />} />
 
       <Route path="/chat" element={<Protected><Chat /></Protected>} />
-      <Route path="/settings/general" element={<Protected><General /></Protected>} />
+      {/* <Route path="/settings/general" element={<Protected><General /></Protected>} /> */}
       <Route path="/settings/profile" element={<Protected><Profile /></Protected>} />
       <Route path="/projects" element={<Protected><Projects /></Protected>} />
       <Route path="/projects/new" element={<Protected><NewProject /></Protected>} />

@@ -8,9 +8,21 @@ import { retrieveContext } from '../services/rag/retrieve'
 
 const router = Router()
 
-async function resolveProvider(userId: string, override?: string) {
+async function resolveProvider(userId: string, projectId: string | undefined, providerOverride?: string) {
+  console.log('[resolveProvider] Start:', { userId, projectId, providerOverride })
+  // If projectId is present, use Project config PREFERENTIALLY
+  if (projectId) {
+     const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
+     console.log('[resolveProvider] Project found:', !!project, 'Provider:', (project as any)?.provider)
+     if (project && (project as any).provider) {
+        return { provider: (project as any).provider, keyEnc: (project as any).apiKeyEnc }
+     }
+  }
+
+  // Fallback to legacy/global settings for backward compat or non-project chats (if any)
   const settings = await prisma.settings.findUnique({ where: { userId } })
-  const provider = (override || settings?.defaultProvider || 'OPENAI') as any
+  const provider = (providerOverride || settings?.defaultProvider || 'GEMINI') as any
+  console.log('[resolveProvider] Fallback settings. Provider:', provider)
   let keyEnc: string | null = null
   switch (provider) {
     case 'OPENAI': keyEnc = settings?.openaiKeyEnc ?? null; break
@@ -28,14 +40,17 @@ async function resolveProvider(userId: string, override?: string) {
 router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const { message, provider: providerOverride, projectId, conversationId } = chatSchema.parse(req.body)
-    const { provider, keyEnc } = await resolveProvider(req.user!.id, providerOverride)
+    const { provider, keyEnc } = await resolveProvider(req.user!.id, projectId, providerOverride)
     if (!keyEnc) {
-      return res.status(400).json({ error: { message: 'Missing API key for selected provider', provider } })
+      console.log('[Chat] Missing key for provider:', provider)
+      return res.status(400).json({ error: { message: 'Missing API key. Please configure the Provider API Key in your Project settings.', provider } })
     }
     let apiKey = ''
     try {
-      apiKey = keyEnc ? decrypt(keyEnc) : ''
+      apiKey = keyEnc ? decrypt(keyEnc).trim() : ''
+      console.log('[Chat] Key Decrypted. len:', apiKey.length, 'preview:', apiKey.slice(0, 5) + '...')
     } catch (err) {
+      console.error('[Chat] Decryption failed:', err)
       return res.status(400).json({ error: { message: 'Unable to decrypt stored API key. ENCRYPTION_KEY likely changed. Please re-enter your provider API key in Settings.' }, provider })
     }
 

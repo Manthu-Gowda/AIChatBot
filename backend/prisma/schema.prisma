@@ -58,7 +58,10 @@ model Project {
 
   description      String?
   websiteUrl       String?
+
   scrapedContent   String?
+  provider         Provider      @default(GEMINI)
+  apiKeyEnc        String?
   files            ProjectFile[]
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import fs from 'fs'
 import { prisma } from '../prisma/client'
+import { encrypt, decrypt, maskKey } from '../services/cryptoService'
 import { AuthRequest, requireAuth } from '../middleware/auth'
 import { projectCreateSchema } from '../utils/validator'
 import { upload } from '../utils/upload'
@@ -16,7 +17,12 @@ router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
     if (data.websiteUrl) {
        try { scrapedContent = await scrapeWebsite(data.websiteUrl) } catch (e) { console.error(e) }
     }
-    const project = await prisma.project.create({ data: { userId: req.user!.id, ...data, scrapedContent } })
+    let apiKeyEnc: string | undefined
+    if (data.apiKey) apiKeyEnc = encrypt(data.apiKey)
+    
+    // Remove apiKey from data before spreading, add apiKeyEnc
+    const { apiKey, ...rest } = data
+    const project = await prisma.project.create({ data: { userId: req.user!.id, ...rest, apiKeyEnc, scrapedContent } })
     res.json(project)
   } catch (e) { next(e) }
 })
@@ -31,7 +37,11 @@ router.get('/', requireAuth, async (req: AuthRequest, res, next) => {
       for (const f of filePaths) {
         try { const st = fs.statSync(f.path); totalBytes += st.size } catch {}
       }
-      return { ...p, fileCount: filePaths.length, totalBytes }
+      let maskedKey = ''
+      if (p.apiKeyEnc) {
+         try { maskedKey = maskKey('' + decrypt(p.apiKeyEnc)) } catch {}
+      }
+      return { ...p, fileCount: filePaths.length, totalBytes, apiKey: maskedKey, apiKeyEnc: undefined }
     }))
     res.json(enriched)
   } catch (e) { next(e) }
@@ -41,7 +51,11 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const p = await prisma.project.findFirst({ where: { id: req.params.id, userId: req.user!.id }, include: { files: true } })
     if (!p) return res.status(404).json({ error: { message: 'Not found' } })
-    res.json(p)
+    let maskedKey = ''
+    if (p.apiKeyEnc) {
+       try { maskedKey = maskKey('' + decrypt(p.apiKeyEnc)) } catch {}
+    }
+    res.json({ ...p, apiKey: maskedKey, apiKeyEnc: undefined })
   } catch (e) { next(e) }
 })
 
@@ -50,7 +64,14 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res, next) => {
     const data = projectCreateSchema.partial().parse(req.body)
     const existing = await prisma.project.findFirst({ where: { id: req.params.id, userId: req.user!.id } })
     if (!existing) return res.status(404).json({ error: { message: 'Not found' } })
-    const p = await prisma.project.update({ where: { id: existing.id }, data })
+    
+    let apiKeyEnc: string | undefined
+    if (data.apiKey) apiKeyEnc = encrypt(data.apiKey)
+    
+    const { apiKey, ...rest } = data
+    const updateData = { ...rest, ...(apiKeyEnc ? { apiKeyEnc } : {}) }
+
+    const p = await prisma.project.update({ where: { id: existing.id }, data: updateData })
     if (data.websiteUrl && data.websiteUrl !== existing.websiteUrl) {
        // Re-scrape if url changed
        try {

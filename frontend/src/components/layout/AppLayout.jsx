@@ -4,23 +4,23 @@ import styles from './AppLayout.module.scss'
 import Button from '../ui/Button'
 import { FiMenu, FiX } from 'react-icons/fi'
 
-export default function AppLayout({ title, right, children }){
+export default function AppLayout({ title, right, children }) {
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
-  function logout(){
-    try { localStorage.removeItem('token') } catch {}
+
+  function logout() {
+    try { localStorage.removeItem('token') } catch { }
     navigate('/', { replace: true })
   }
 
-  function closeMobileMenu(){
+  function closeMobileMenu() {
     setMobileMenuOpen(false)
   }
 
   return (
     <div className={styles.app}>
       {/* Mobile Overlay */}
-      <div 
+      <div
         className={`${styles.mobileOverlay} ${mobileMenuOpen ? styles.open : ''}`}
         onClick={closeMobileMenu}
       />
@@ -34,17 +34,17 @@ export default function AppLayout({ title, right, children }){
           <Link className={styles.link} to="/chat" onClick={closeMobileMenu}>
             💬 New Chat
           </Link>
-          <Link className={styles.link} to="/settings/general" onClick={closeMobileMenu}>
+          {/* <Link className={styles.link} to="/settings/general" onClick={closeMobileMenu}>
             ⚙️ General Settings
-          </Link>
+          </Link> */}
           <Link className={styles.link} to="/projects" onClick={closeMobileMenu}>
             📁 Projects
           </Link>
-        
+
         </nav>
         <div className={styles.sidebarFooter}>
           {/* <div className={styles.version}>v0.1.0</div> */}
-            <Link className={styles.link} to="/settings/profile" onClick={closeMobileMenu}>
+          <Link className={styles.link} to="/settings/profile" onClick={closeMobileMenu}>
             👤 Profile Settings
           </Link>
           <button onClick={logout} className={styles.logoutButton}>
@@ -57,7 +57,7 @@ export default function AppLayout({ title, right, children }){
       <section className={styles.content}>
         <div className={styles.topbar}>
           <div>
-            <button 
+            <button
               className={styles.menuButton}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
