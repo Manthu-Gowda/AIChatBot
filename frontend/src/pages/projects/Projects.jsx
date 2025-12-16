@@ -47,7 +47,7 @@ export default function Projects(){
     } catch (e) {
       alert('Copy failed. Please copy manually from the console.')
       // eslint-disable-next-line no-console
-      console.log(buildEmbed(projectId))
+
     }
   }
 

@@ -43,6 +43,10 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
       case 'DEEPSEEK': keyEnc = settings?.deepseekKeyEnc ?? null; break
       case 'GEMINI': keyEnc = settings?.geminiKeyEnc ?? null; break
       case 'PERPLEXITY': keyEnc = settings?.perplexityKeyEnc ?? null; break
+      case 'ANTHROPIC': keyEnc = settings?.anthropicKeyEnc ?? null; break
+      case 'MISTRAL': keyEnc = settings?.mistralKeyEnc ?? null; break
+      case 'OPENROUTER': keyEnc = settings?.openrouterKeyEnc ?? null; break
+      case 'GROQ': keyEnc = settings?.groqKeyEnc ?? null; break
     }
     if (!keyEnc) return res.status(400).json({ error: { message: 'Missing API key', provider } })
     let apiKey: string

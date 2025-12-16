@@ -21,11 +21,11 @@ export default function Chat() {
       try {
         const { data } = await api.get("/projects");
         setProjects(data);
-      } catch {}
+      } catch { }
       try {
         const { data } = await api.get("/settings");
         if (data?.defaultProvider) setProvider(data.defaultProvider);
-      } catch {}
+      } catch { }
     })();
   }, []);
 
@@ -131,6 +131,10 @@ export default function Chat() {
             <option>DEEPSEEK</option>
             <option>GEMINI</option>
             <option>PERPLEXITY</option>
+            <option>ANTHROPIC</option>
+            <option>MISTRAL</option>
+            <option>OPENROUTER</option>
+            <option>GROQ</option>
           </Select>
         </div>
         <div className={styles.controlGroup}>
@@ -173,7 +177,7 @@ export default function Chat() {
             })
           )}
         </div>
-        
+
         <div className={styles.inputArea}>
           <div className={styles.inputWrapper}>
             <TextArea

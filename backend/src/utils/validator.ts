@@ -18,13 +18,18 @@ export const forgotSchema = z.object({ email: emailSchema })
 export const resetSchema = z.object({ token: z.string().min(10), password: z.string().min(8) })
 
 export const settingsSchema = z.object({
-  defaultProvider: z.enum(['OPENAI', 'DEEPSEEK', 'GEMINI', 'PERPLEXITY']).optional(),
+  defaultProvider: z.enum(['OPENAI', 'DEEPSEEK', 'GEMINI', 'PERPLEXITY', 'ANTHROPIC', 'MISTRAL', 'OPENROUTER', 'GROQ']).optional(),
   apiKeys: z
     .object({
       openai: z.string().optional(),
       deepseek: z.string().optional(),
       gemini: z.string().optional(),
       perplexity: z.string().optional(),
+      anthropic: z.string().optional(),
+      mistral: z.string().optional(),
+
+      openrouter: z.string().optional(),
+      groq: z.string().optional(),
     })
     .optional(),
 })
@@ -34,13 +39,14 @@ export const projectCreateSchema = z.object({
   role: z.string().optional(),
   responsibilities: z.string().optional(),
   description: z.string().optional(),
+  websiteUrl: z.string().url().optional().or(z.literal('')),
 })
 
 export const folderCreateSchema = z.object({ name: z.string().min(1), parentId: z.string().optional() })
 
 export const chatSchema = z.object({
   message: z.string().min(1),
-  provider: z.enum(['OPENAI', 'DEEPSEEK', 'GEMINI', 'PERPLEXITY']).optional(),
+  provider: z.enum(['OPENAI', 'DEEPSEEK', 'GEMINI', 'PERPLEXITY', 'ANTHROPIC', 'MISTRAL', 'OPENROUTER', 'GROQ']).optional(),
   projectId: z.string().optional(),
   conversationId: z.string().optional(),
 })

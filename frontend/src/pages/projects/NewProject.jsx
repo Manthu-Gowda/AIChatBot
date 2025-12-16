@@ -10,7 +10,7 @@ import styles from './NewProject.module.scss'
 export default function NewProject(){
   const nav = useNavigate()
   const { id } = useParams()
-  const [form, setForm] = useState({ name:'', role:'', responsibilities:'', description:'' })
+  const [form, setForm] = useState({ name:'', role:'', responsibilities:'', description:'', websiteUrl:'' })
   const [files, setFiles] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [existingFiles, setExistingFiles] = useState([])
@@ -23,7 +23,7 @@ export default function NewProject(){
         setLoading(true)
         const { data } = await api.get('/projects/'+id)
         if (data){
-          setForm({ name: data.name||'', role: data.role||'', responsibilities: data.responsibilities||'', description: data.description||'' })
+          setForm({ name: data.name||'', role: data.role||'', responsibilities: data.responsibilities||'', description: data.description||'', websiteUrl: data.websiteUrl||'' })
           setExistingFiles(Array.isArray(data.files) ? data.files : [])
         }
       } catch {} finally { setLoading(false) }
@@ -92,6 +92,14 @@ export default function NewProject(){
             />
           </Field>
           
+          <Field label="Website URL (Optional)" hint="We will scrape this site for project context">
+            <Input 
+              placeholder="https://example.com/docs" 
+              value={form.websiteUrl} 
+              onChange={e=>setForm({...form, websiteUrl:e.target.value})}
+            />
+          </Field>
+
           <Field label="Responsibilities" hint="What should the AI help with?">
             <TextArea 
               placeholder="Describe the AI's responsibilities..." 

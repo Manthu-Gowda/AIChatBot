@@ -5,13 +5,18 @@ import { AuthRequest, requireAuth } from '../middleware/auth'
 import { projectCreateSchema } from '../utils/validator'
 import { upload } from '../utils/upload'
 import { createEmbeddingsForFile } from '../services/rag/embed'
+import { scrapeWebsite } from '../services/scraper'
 
 const router = Router()
 
 router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const data = projectCreateSchema.parse(req.body)
-    const project = await prisma.project.create({ data: { userId: req.user!.id, ...data } })
+    let scrapedContent = ''
+    if (data.websiteUrl) {
+       try { scrapedContent = await scrapeWebsite(data.websiteUrl) } catch (e) { console.error(e) }
+    }
+    const project = await prisma.project.create({ data: { userId: req.user!.id, ...data, scrapedContent } })
     res.json(project)
   } catch (e) { next(e) }
 })
@@ -20,7 +25,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const projects = await prisma.project.findMany({ where: { userId: req.user!.id }, orderBy: { createdAt: 'desc' } })
     // Enrich with file counts and total size (best-effort disk stat)
-    const enriched = await Promise.all(projects.map(async (p) => {
+    const enriched = await Promise.all(projects.map(async (p: any) => {
       const filePaths = await prisma.projectFile.findMany({ where: { projectId: p.id }, select: { path: true } })
       let totalBytes = 0
       for (const f of filePaths) {
@@ -46,6 +51,14 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res, next) => {
     const existing = await prisma.project.findFirst({ where: { id: req.params.id, userId: req.user!.id } })
     if (!existing) return res.status(404).json({ error: { message: 'Not found' } })
     const p = await prisma.project.update({ where: { id: existing.id }, data })
+    if (data.websiteUrl && data.websiteUrl !== existing.websiteUrl) {
+       // Re-scrape if url changed
+       try {
+         const scrapedContent = await scrapeWebsite(data.websiteUrl)
+         await prisma.project.update({ where: { id: existing.id }, data: { scrapedContent } })
+         // TODO: Embeddings for scraped content
+       } catch (e) { console.error(e) }
+    }
     res.json(p)
   } catch (e) { next(e) }
 })

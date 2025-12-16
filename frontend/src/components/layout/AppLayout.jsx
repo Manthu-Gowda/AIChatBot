@@ -66,7 +66,7 @@ export default function AppLayout({ title, right, children }){
             </button>
             <span>{title || ''}</span>
           </div>
-          {/* <div>{right || <Button variant="ghost" onClick={logout}>Logout</Button>}</div> */}
+          <div>{right || <Button variant="ghost" onClick={logout}>Logout</Button>}</div>
         </div>
         <main className={styles.main}>{children}</main>
       </section>

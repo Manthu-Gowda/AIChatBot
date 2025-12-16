@@ -12,6 +12,11 @@ enum Provider {
   DEEPSEEK
   GEMINI
   PERPLEXITY
+  ANTHROPIC
+  MISTRAL
+
+  OPENROUTER
+  GROQ
 }
 
 model User {
@@ -31,11 +36,16 @@ model User {
 model Settings {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
   userId           String   @unique @db.ObjectId
-  defaultProvider  Provider @default(OPENAI)
+  defaultProvider  Provider @default(GEMINI)
   openaiKeyEnc     String?
   deepseekKeyEnc   String?
   geminiKeyEnc     String?
   perplexityKeyEnc String?
+  anthropicKeyEnc  String?
+  mistralKeyEnc    String?
+
+  openrouterKeyEnc String?
+  groqKeyEnc       String?
   user             User     @relation(fields: [userId], references: [id])
 }
 
@@ -45,7 +55,10 @@ model Project {
   name             String
   role             String?
   responsibilities String?
+
   description      String?
+  websiteUrl       String?
+  scrapedContent   String?
   files            ProjectFile[]
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt

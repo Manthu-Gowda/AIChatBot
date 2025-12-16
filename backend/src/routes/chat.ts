@@ -17,6 +17,10 @@ async function resolveProvider(userId: string, override?: string) {
     case 'DEEPSEEK': keyEnc = settings?.deepseekKeyEnc ?? null; break
     case 'GEMINI': keyEnc = settings?.geminiKeyEnc ?? null; break
     case 'PERPLEXITY': keyEnc = settings?.perplexityKeyEnc ?? null; break
+    case 'ANTHROPIC': keyEnc = settings?.anthropicKeyEnc ?? null; break
+    case 'MISTRAL': keyEnc = settings?.mistralKeyEnc ?? null; break
+    case 'OPENROUTER': keyEnc = settings?.openrouterKeyEnc ?? null; break
+    case 'GROQ': keyEnc = settings?.groqKeyEnc ?? null; break
   }
   return { provider, keyEnc }
 }
@@ -49,7 +53,15 @@ router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
       const project = await prisma.project.findFirst({ where: { id: projectId, userId: req.user!.id } })
       if (project) {
         const ctx = await retrieveContext(project)
-        systemPrompt = `You are an assistant. Use this project context to assist the user.\n${ctx}`
+        let rolePrompt = `You are a helpful assistant.`
+        if (project.role) rolePrompt = `You are: ${project.role}.`
+        if (project.responsibilities) rolePrompt += `\nYour responsibilities: ${project.responsibilities}.`
+        
+        systemPrompt = `${rolePrompt}\n\nUse the following project context to assist the user. strictly adhere to your role and responsibilities.`
+        if (project.scrapedContent) {
+           systemPrompt += `\n\nWEBSITE CONTENT:\n${project.scrapedContent.slice(0, 15000)}`
+        }
+        if (ctx) systemPrompt += `\n\nUPLOADED FILES CONTEXT:\n${ctx}`
       }
     }
 

@@ -3,6 +3,7 @@ import { chatOpenAI, streamOpenAI } from './openai'
 import { chatDeepSeek } from './deepseek'
 import { streamDeepSeek } from './deepseek'
 import { chatGemini, streamGemini } from './gemini'
+import { chatGroq, streamGroq } from './groq'
 
 export async function chatWithProvider(p: Provider, apiKey: string, messages: { role: string; content: string }[], systemPrompt?: string) {
   switch (p) {
@@ -13,9 +14,12 @@ export async function chatWithProvider(p: Provider, apiKey: string, messages: { 
     case 'GEMINI':
       return chatGemini(apiKey, messages, systemPrompt)
     case 'PERPLEXITY':
-      // Stubs: mimic AI response
-      return `Stubbed ${p} response: ${messages[messages.length - 1]?.content ?? ''}`
-      // return chatPerplexity(apiKey, messages, systemPrompt)
+    case 'ANTHROPIC':
+    case 'MISTRAL':
+    case 'OPENROUTER':
+    case 'GROQ':
+      return chatGroq(apiKey, messages, systemPrompt)
+    case 'PERPLEXITY':
     default:
       throw new Error('Unsupported provider')
   }
@@ -35,13 +39,13 @@ export async function streamWithProvider(
       return streamDeepSeek(apiKey, messages, systemPrompt, onToken)
     case 'GEMINI':
       return streamGemini(apiKey, messages, systemPrompt, onToken)
-    case 'PERPLEXITY': {
-      // Stream a stubbed response word-by-word
-      const text = `Stubbed ${p} response: ${messages[messages.length - 1]?.content ?? ''}`
-      const parts = text.split(/(\s+)/)
-      for (const part of parts) { onToken(part); await new Promise(r => setTimeout(r, 5)) }
-      return
-    }
+    case 'PERPLEXITY':
+    case 'ANTHROPIC':
+    case 'MISTRAL':
+    case 'OPENROUTER':
+    case 'GROQ':
+      return streamGroq(apiKey, messages, systemPrompt, onToken)
+    case 'PERPLEXITY':
     default:
       throw new Error('Unsupported provider')
   }

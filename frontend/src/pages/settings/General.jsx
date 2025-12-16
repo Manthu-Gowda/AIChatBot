@@ -7,8 +7,8 @@ import Loader from '../../components/loader/Loader'
 import styles from './Settings.module.scss'
 
 export default function General(){
-  const [defaultProvider, setDefaultProvider] = useState('OPENAI')
-  const [apiKeys, setApiKeys] = useState({ openai: '', deepseek:'', gemini:'', perplexity:'' })
+  const [provider, setProvider] = useState('GEMINI')
+  const [apiKeys, setApiKeys] = useState({ openai: '', deepseek:'', gemini:'', perplexity:'', anthropic:'', mistral:'', openrouter:'', groq:'' })
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(false)
   
@@ -17,12 +17,16 @@ export default function General(){
       setLoading(true)
       const { data } = await api.get('/settings')
       if (data){ 
-        setDefaultProvider(data.defaultProvider)
+        setProvider(data.defaultProvider || 'GEMINI')
         setApiKeys({ 
           openai: data.apiKeys?.openai || '', 
           deepseek: data.apiKeys?.deepseek || '', 
           gemini: data.apiKeys?.gemini || '', 
-          perplexity: data.apiKeys?.perplexity || '' 
+          perplexity: data.apiKeys?.perplexity || '',
+          anthropic: data.apiKeys?.anthropic || '',
+          mistral: data.apiKeys?.mistral || '',
+          openrouter: data.apiKeys?.openrouter || '',
+          groq: data.apiKeys?.groq || ''
         }) 
       }
     }
@@ -34,7 +38,7 @@ export default function General(){
     setLoading(true)
     const keys = { ...apiKeys }
     Object.keys(keys).forEach(k=>{ if (keys[k] && keys[k].startsWith('sk-****')) keys[k] = undefined })
-    await api.put('/settings', { defaultProvider, apiKeys: keys })
+    await api.put('/settings', { defaultProvider: provider, apiKeys: keys })
     setMsg('Settings saved successfully!')
     setLoading(false)
   }
@@ -50,51 +54,62 @@ export default function General(){
         
         <div className={styles.settingsForm}>
           <div className={styles.formSection}>
-            <div className={styles.sectionTitle}>Default AI Provider</div>
-            <Field label="Provider">
-              <Select value={defaultProvider} onChange={e=>setDefaultProvider(e.target.value)}>
+            <div className={styles.sectionTitle}>API Key Configuration</div>
+            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: 10 }}>Select your default AI provider and configure its key.</p>
+            
+            <Field label="AI Provider">
+              <Select value={provider} onChange={e=>setProvider(e.target.value)}>
                 <option>OPENAI</option>
                 <option>DEEPSEEK</option>
                 <option>GEMINI</option>
                 <option>PERPLEXITY</option>
+                <option>ANTHROPIC</option>
+                <option>MISTRAL</option>
+                <option>OPENROUTER</option>
+                <option>GROQ</option>
               </Select>
             </Field>
-          </div>
 
-          <div className={styles.formSection}>
-            <div className={styles.sectionTitle}>API Keys</div>
-            <Field label="OpenAI API Key" hint="Stored encrypted; shown masked after saving.">
-              <Input 
-                type="password"
-                placeholder="sk-..." 
-                value={apiKeys.openai} 
-                onChange={e=>setApiKeys({...apiKeys, openai: e.target.value})} 
-              />
-            </Field>
-            <Field label="DeepSeek API Key" hint="Get your API key from deepseek.com">
-              <Input 
-                type="password"
-                placeholder="sk-..." 
-                value={apiKeys.deepseek} 
-                onChange={e=>setApiKeys({...apiKeys, deepseek: e.target.value})} 
-              />
-            </Field>
-            <Field label="Gemini API Key" hint="Get your API key from Google AI Studio">
-              <Input 
-                type="password"
-                placeholder="..." 
-                value={apiKeys.gemini} 
-                onChange={e=>setApiKeys({...apiKeys, gemini: e.target.value})} 
-              />
-            </Field>
-            <Field label="Perplexity API Key" hint="Get your API key from perplexity.ai">
-              <Input 
-                type="password"
-                placeholder="..." 
-                value={apiKeys.perplexity} 
-                onChange={e=>setApiKeys({...apiKeys, perplexity: e.target.value})} 
-              />
-            </Field>
+            {provider === 'OPENAI' && (
+              <Field label="OpenAI API Key">
+                <Input type="password" placeholder="sk-..." value={apiKeys.openai} onChange={e=>setApiKeys({...apiKeys, openai: e.target.value})} />
+              </Field>
+            )}
+            {provider === 'DEEPSEEK' && (
+              <Field label="DeepSeek API Key">
+                <Input type="password" placeholder="sk-..." value={apiKeys.deepseek} onChange={e=>setApiKeys({...apiKeys, deepseek: e.target.value})} />
+              </Field>
+            )}
+            {provider === 'GEMINI' && (
+               <Field label="Gemini API Key">
+                 <Input type="password" placeholder="..." value={apiKeys.gemini} onChange={e=>setApiKeys({...apiKeys, gemini: e.target.value})} />
+               </Field>
+            )}
+            {provider === 'PERPLEXITY' && (
+               <Field label="Perplexity API Key">
+                 <Input type="password" placeholder="..." value={apiKeys.perplexity} onChange={e=>setApiKeys({...apiKeys, perplexity: e.target.value})} />
+               </Field>
+            )}
+            {provider === 'ANTHROPIC' && (
+               <Field label="Anthropic API Key">
+                 <Input type="password" placeholder="sk-ant-..." value={apiKeys.anthropic} onChange={e=>setApiKeys({...apiKeys, anthropic: e.target.value})} />
+               </Field>
+            )}
+            {provider === 'MISTRAL' && (
+               <Field label="Mistral API Key">
+                 <Input type="password" placeholder="..." value={apiKeys.mistral} onChange={e=>setApiKeys({...apiKeys, mistral: e.target.value})} />
+               </Field>
+            )}
+            {provider === 'OPENROUTER' && (
+               <Field label="OpenRouter API Key">
+                 <Input type="password" placeholder="sk-or-..." value={apiKeys.openrouter} onChange={e=>setApiKeys({...apiKeys, openrouter: e.target.value})} />
+               </Field>
+            )}
+            {provider === 'GROQ' && (
+               <Field label="Groq API Key">
+                 <Input type="password" placeholder="gsk_..." value={apiKeys.groq} onChange={e=>setApiKeys({...apiKeys, groq: e.target.value})} />
+               </Field>
+            )}
           </div>
 
           <div className={styles.formActions}>

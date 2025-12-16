@@ -55,7 +55,7 @@ function WidgetLayout() {
   const [list, setList] = useState([])
   const [pending, setPending] = useState(false)
   const listRef = useRef(null)
-  useEffect(()=>{ listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior:'smooth' }) }, [list])
+  useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }) }, [list])
 
   async function send() {
     if (!msg.trim()) return
@@ -65,21 +65,21 @@ function WidgetLayout() {
     setPending(true)
     const res = await fetch(base + '/widget/chat?stream=1', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' },
-      body: JSON.stringify({ message: msg, projectId })
+      body: JSON.stringify({ message: msg, projectId: "694101fff7c8ce71eee6d548" })
     })
     if (!res.ok) {
-      setList((l)=>{ const copy=[...l]; const idx=copy.length-1; copy[idx] = { ...copy[idx], content: 'Request failed' }; return copy })
+      setList((l) => { const copy = [...l]; const idx = copy.length - 1; copy[idx] = { ...copy[idx], content: 'Request failed' }; return copy })
       setMsg('')
       setPending(false)
       return
     }
-    const reader = res.body.getReader(); const decoder = new TextDecoder(); let buffer=''
-    const append = (t)=>{ setList((l)=>{ const copy=[...l]; const idx=copy.length-1; copy[idx] = { ...copy[idx], content: (copy[idx].content||'') + t }; return copy }) }
-    while(true){
+    const reader = res.body.getReader(); const decoder = new TextDecoder(); let buffer = ''
+    const append = (t) => { setList((l) => { const copy = [...l]; const idx = copy.length - 1; copy[idx] = { ...copy[idx], content: (copy[idx].content || '') + t }; return copy }) }
+    while (true) {
       const { value, done } = await reader.read(); if (done) break
-      buffer += decoder.decode(value, { stream:true })
-      let sep; while((sep = buffer.indexOf('\n\n')) !== -1){
-        const chunk = buffer.slice(0, sep); buffer = buffer.slice(sep+2)
+      buffer += decoder.decode(value, { stream: true })
+      let sep; while ((sep = buffer.indexOf('\n\n')) !== -1) {
+        const chunk = buffer.slice(0, sep); buffer = buffer.slice(sep + 2)
         const line = chunk.trim(); if (!line.startsWith('data:')) continue
         const dataStr = line.slice(5).trim(); if (dataStr === '[DONE]') break
         try { const obj = JSON.parse(dataStr); if (obj?.token) append(obj.token) } catch { append(dataStr) }
@@ -90,13 +90,13 @@ function WidgetLayout() {
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif', background:'var(--color-bg)', color:'var(--color-text)', height:'100vh', display:'flex', flexDirection:'column', padding:12 }}>
-      <div className="card" style={{ marginBottom: 10, padding: 12, background:'#fff' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif', background: 'var(--color-bg)', color: 'var(--color-text)', height: '100vh', display: 'flex', flexDirection: 'column', padding: 12 }}>
+      <div className="card" style={{ marginBottom: 10, padding: 12, background: '#fff' }}>
         <div style={{ fontWeight: 700 }}>AI Chat</div>
       </div>
-      <div className="card" style={{ flex:1, display:'flex', flexDirection:'column', background:'#fff', padding:0 }}>
-        <div ref={listRef} style={{ flex:1, overflow:'auto', padding:12, display:'flex', flexDirection:'column', gap:12 }}>
-          {list.map((m,i)=> {
+      <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff', padding: 0 }}>
+        <div ref={listRef} style={{ flex: 1, overflow: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {list.map((m, i) => {
             const isLast = i === list.length - 1
             const showTyping = isLast && m.role === 'assistant' && pending && !m.content
             return (
@@ -104,9 +104,9 @@ function WidgetLayout() {
             )
           })}
         </div>
-        <div style={{ background:'#fff', borderTop:'1px solid var(--border)', padding:12 }}>
+        <div style={{ background: '#fff', borderTop: '1px solid var(--border)', padding: 12 }}>
           <div>
-            <TextArea value={msg} onChange={(e)=>setMsg(e.target.value)} placeholder="Type your message..." style={{ flex: 1, height: 80 }} onKeyDown={(e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send() } }} />
+            <TextArea value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Type your message..." style={{ flex: 1, height: 80 }} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }} />
             <Button onClick={send}>Send</Button>
           </div>
         </div>
