@@ -82,7 +82,7 @@ function resolveFrontendDist(): string {
   return byDist
 }
 const FRONTEND_DIST = resolveFrontendDist()
-const WIDGET_ALLOWED_ORIGINS = (process.env.WIDGET_ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean)
+const WIDGET_ALLOWED_ORIGINS = (process.env.WIDGET_ALLOWED_ORIGINS || 'https://aichatbot-yd2o.onrender.com/').split(',').map(s => s.trim()).filter(Boolean)
 
 // CORS: allow configured frontend, widget origins, and same-origin backend
 const allowedOrigins = new Set([
@@ -169,6 +169,11 @@ app.get(['/widget-layout', '/widget'], (req, res) => {
   if (isProd) {
     // Serve the SPA entry; route is handled client-side
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+    // Log request origin and referer for debugging CSP/frame-ancestors issues
+    // This helps identify the actual embedding origin seen by the server.
+    // NOTE: these logs may contain origins/hosts; do not paste secrets publicly.
+    // eslint-disable-next-line no-console
+    console.log('[Widget] Request headers - origin:', req.headers.origin, 'referer:', req.headers.referer, 'host:', req.get('host'))
     // Allow embedding in iframes from other origins (widget use-case)
     res.removeHeader('X-Frame-Options')
     // Loosen CSP frame-ancestors specifically for widget layout.
