@@ -12,6 +12,7 @@ import projectRoutes from './routes/projects'
 import folderRoutes from './routes/folders'
 import chatRoutes from './routes/chat'
 import widgetRoutes from './routes/widget'
+import { prisma } from './prisma/client'
 import configRoutes from './routes/config'
 import { authLimiter, chatLimiter } from './middleware/rateLimit'
 import { errorHandler } from './middleware/error'
@@ -172,7 +173,7 @@ app.use('/widget', widgetRoutes)
 app.use('/config', configRoutes)
 
 // Widget layout (Allows iframe embedding)
-app.get(['/widget-layout', '/widget'], (req, res) => {
+app.get(['/widget-layout', '/widget'], async (req, res) => {
   const q = new URLSearchParams(req.query as any).toString()
   if (isProd) {
     // Serve the SPA entry; route is handled client-side
@@ -192,6 +193,18 @@ app.get(['/widget-layout', '/widget'], (req, res) => {
       const faParts = ["'self'"]
       if (RENDER_EXTERNAL_URL_NORMALIZED) faParts.push(RENDER_EXTERNAL_URL_NORMALIZED)
       if (WIDGET_ALLOWED_ORIGINS.length > 0) faParts.push(...WIDGET_ALLOWED_ORIGINS)
+    // If the request includes a projectId, add that project's `projectLink` to allowed frame-ancestors
+    const projectId = String((req.query as any).projectId || '')
+    if (projectId) {
+      try {
+        const project = await prisma.project.findFirst({ where: { id: projectId }, select: { projectLink: true } })
+        const pLink = project?.projectLink ? String(project.projectLink).replace(/\/+$/, '') : ''
+        if (pLink) faParts.push(pLink)
+      } catch (err) {
+        console.error('[Widget] Failed to load project for CSP:', err)
+      }
+    }
+
     const fa = faParts.filter(Boolean).join(' ')
     if (faParts.length > 0) {
       res.setHeader('Content-Security-Policy', `frame-ancestors ${fa}`)

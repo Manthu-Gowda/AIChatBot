@@ -78,7 +78,7 @@ export default function FloatingWidget(){
           style={{ 
             position: 'fixed', 
             inset: 0, 
-            background: 'rgba(0,0,0,.5)', 
+            background: 'rgba(82, 82, 82, 0.5)', 
             backdropFilter: 'blur(4px)',
             zIndex: 2147483646,
             animation: 'fadeIn 0.2s ease'

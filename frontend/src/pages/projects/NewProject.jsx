@@ -10,7 +10,7 @@ import styles from './NewProject.module.scss'
 export default function NewProject() {
   const nav = useNavigate()
   const { id } = useParams()
-  const [form, setForm] = useState({ name: '', role: '', responsibilities: '', description: '', websiteUrl: '', provider: 'GEMINI', apiKey: '' })
+  const [form, setForm] = useState({ name: '', role: '', responsibilities: '', description: '', websiteUrl: '', projectLink: '', provider: 'GEMINI', apiKey: '' })
   const [providers, setProviders] = useState([])
   const [files, setFiles] = useState([])
   const [submitting, setSubmitting] = useState(false)
@@ -27,12 +27,13 @@ export default function NewProject() {
           setLoading(true)
           const { data } = await api.get('/projects/' + id)
           if (data) {
-            setForm({
+              setForm({
               name: data.name || '',
               role: data.role || '',
               responsibilities: data.responsibilities || '',
               description: data.description || '',
               websiteUrl: data.websiteUrl || '',
+              projectLink: data.projectLink || '',
               provider: data.provider || 'GEMINI',
               apiKey: data.apiKey || '' // If masked, placeholder? User can overwrite.
             })
@@ -104,13 +105,15 @@ export default function NewProject() {
             />
           </Field>
 
-          <Field label="Website URL (Optional)" hint="We will scrape this site for project context">
+          <Field label="Project Link (Used for widget embedding)" hint="Enter the public URL where this project/widget will be embedded (e.g., https://example.com)">
             <Input
-              placeholder="https://example.com/docs"
-              value={form.websiteUrl}
-              onChange={e => setForm({ ...form, websiteUrl: e.target.value })}
+              placeholder="https://your-site.com"
+              value={form.projectLink}
+              onChange={e => setForm({ ...form, projectLink: e.target.value })}
             />
           </Field>
+
+          {/* Project logo removed — widget shows default button text */}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label="AI Provider" hint="Select the AI model for this project">

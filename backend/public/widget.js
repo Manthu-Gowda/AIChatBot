@@ -6,6 +6,10 @@
   const projectId = script.getAttribute('data-project')
 
   const btn = document.createElement('button')
+  btn.style.display = 'flex'
+  btn.style.alignItems = 'center'
+  btn.style.justifyContent = 'center'
+  // Default text; may be replaced with project logo if configured
   btn.textContent = 'Chat'
   btn.style.position = 'fixed'
   btn.style.right = '20px'
@@ -16,6 +20,8 @@
   btn.style.color = 'white'
   btn.style.zIndex = '2147483647'
   document.body.appendChild(btn)
+
+  // Project logo feature removed — default button text is shown
 
   const overlay = document.createElement('div')
   overlay.style.position = 'fixed'

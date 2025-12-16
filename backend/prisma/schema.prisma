@@ -57,6 +57,7 @@ model Project {
 
   description      String?
   websiteUrl       String?
+  projectLink      String?
 
   scrapedContent   String?
   provider         Provider      @default(GEMINI)

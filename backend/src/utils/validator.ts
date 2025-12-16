@@ -40,6 +40,7 @@ export const projectCreateSchema = z.object({
   responsibilities: z.string().optional(),
   description: z.string().optional(),
   websiteUrl: z.string().url().optional().or(z.literal('')),
+  projectLink: z.string().url().optional().or(z.literal('')),
   provider: z.enum(['OPENAI', 'DEEPSEEK', 'GEMINI', 'PERPLEXITY', 'ANTHROPIC', 'MISTRAL', 'OPENROUTER', 'GROQ']).optional(),
   apiKey: z.string().optional(),
 })
