@@ -82,7 +82,15 @@ function resolveFrontendDist(): string {
   return byDist
 }
 const FRONTEND_DIST = resolveFrontendDist()
-const WIDGET_ALLOWED_ORIGINS = (process.env.WIDGET_ALLOWED_ORIGINS || 'https://aichatbot-yd2o.onrender.com/').split(',').map(s => s.trim()).filter(Boolean)
+// Normalize configured widget origins: split, trim whitespace and trailing slashes
+function normalizeOrigin(raw?: string) {
+  if (!raw) return ''
+  return raw.trim().replace(/\/+$|:\/\/$/g, '').replace(/\/$/, '')
+}
+const rawWidgetAllowed = process.env.WIDGET_ALLOWED_ORIGINS || ''
+const WIDGET_ALLOWED_ORIGINS = rawWidgetAllowed.split(',').map(s => s.trim()).map(s => s.replace(/\/+$/, '')).filter(Boolean)
+// Normalize RENDER_EXTERNAL_URL (remove trailing slash if present)
+const RENDER_EXTERNAL_URL_NORMALIZED = RENDER_EXTERNAL_URL ? String(RENDER_EXTERNAL_URL).replace(/\/+$/, '') : undefined
 
 // CORS: allow configured frontend, widget origins, and same-origin backend
 const allowedOrigins = new Set([
@@ -181,9 +189,9 @@ app.get(['/widget-layout', '/widget'], (req, res) => {
     // and any configured WIDGET_ALLOWED_ORIGINS so hosts embedding the widget
     // are explicitly allowed.
     res.removeHeader('Content-Security-Policy')
-    const faParts = ["'self'"]
-    if (RENDER_EXTERNAL_URL) faParts.push(RENDER_EXTERNAL_URL)
-    if (WIDGET_ALLOWED_ORIGINS.length > 0) faParts.push(...WIDGET_ALLOWED_ORIGINS)
+      const faParts = ["'self'"]
+      if (RENDER_EXTERNAL_URL_NORMALIZED) faParts.push(RENDER_EXTERNAL_URL_NORMALIZED)
+      if (WIDGET_ALLOWED_ORIGINS.length > 0) faParts.push(...WIDGET_ALLOWED_ORIGINS)
     const fa = faParts.filter(Boolean).join(' ')
     if (faParts.length > 0) {
       res.setHeader('Content-Security-Policy', `frame-ancestors ${fa}`)
@@ -191,7 +199,7 @@ app.get(['/widget-layout', '/widget'], (req, res) => {
     } else {
       console.log('[Widget] No origins configured for frame-ancestors; leaving CSP unset')
     }
-    console.log('[Widget] Origins Configured:', faParts)
+      console.log('[Widget] Origins Configured:', faParts)
     return res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
   }
   const url = `${FRONTEND_URL}/widget-layout${q ? `?${q}` : ''}`
