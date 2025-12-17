@@ -10,7 +10,7 @@ import { MdDelete } from "react-icons/md"
 import { CiChat2 } from "react-icons/ci"
 import styles from './Projects.module.scss'
 
-export default function Projects(){
+export default function Projects() {
   const nav = useNavigate()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,41 +18,43 @@ export default function Projects(){
   const [tenantId, setTenantId] = useState('')
   const [copiedId, setCopiedId] = useState('')
 
-  async function load(){
+  async function load() {
     setLoading(true); setErr('')
     try { const { data } = await api.get('/projects'); setList(data || []) }
-    catch (e){ setErr(e?.message || 'Failed to load projects') }
+    catch (e) { setErr(e?.message || 'Failed to load projects') }
     finally { setLoading(false) }
   }
 
-  useEffect(()=>{ load(); (async()=>{ try { const { data } = await api.get('/me'); setTenantId(data?.id || '') } catch {} })() },[])
+  useEffect(() => { load(); (async () => { try { const { data } = await api.get('/me'); setTenantId(data?.id || '') } catch { } })() }, [])
 
-  async function onDelete(id){
+  async function onDelete(id) {
     if (!confirm('Delete this project? This cannot be undone.')) return
-    try { await api.delete('/projects/'+id); await load() }
-    catch (e){ alert(e?.message || 'Delete failed') }
+    try { await api.delete('/projects/' + id); await load() }
+    catch (e) { alert(e?.message || 'Delete failed') }
   }
 
-  function buildEmbed(projectId){
+  function buildEmbed(projectId, projectName) {
     const base = getBackendBaseUrl()
-    return `<script src="${base}/widget.js" data-tenant="${tenantId}" data-project="${projectId}" async></script>`
+    // Use project name as default title if available
+    const title = projectName || 'AI Chat'
+    return `<script src="${base}/widget.js" data-tenant="${tenantId}" data-project="${projectId}" data-title="${title}" async></script>`
   }
 
-  async function copyEmbed(projectId){
+  async function copyEmbed(projectId, projectName) {
     try {
-      const text = buildEmbed(projectId)
+      const text = buildEmbed(projectId, projectName)
       await navigator.clipboard.writeText(text)
       setCopiedId(projectId)
-      setTimeout(()=> setCopiedId(''), 1500)
+      setTimeout(() => setCopiedId(''), 1500)
     } catch (e) {
       alert('Copy failed. Please copy manually from the console.')
       // eslint-disable-next-line no-console
-
+      console.error(e)
     }
   }
 
   return (
-    <AppLayout title="Projects" right={<Button onClick={()=>nav('/projects/new')}>+ Create Project</Button>}>
+    <AppLayout title="Projects" right={<Button onClick={() => nav('/projects/new')}>+ Create Project</Button>}>
       {loading && <Loader />}
       <div className={styles.tableCard}>
         {err ? (
@@ -84,10 +86,10 @@ export default function Projects(){
                   </td>
                   <td>{new Date(p.createdAt).toLocaleDateString()}</td>
                   <td>
-                    <button 
+                    <button
                       className={`btn2 ${styles.embedButton} ${copiedId === p.id ? styles.copied : ''}`}
-                      onClick={()=>copyEmbed(p.id)} 
-                      title="Copy embed code" 
+                      onClick={() => copyEmbed(p.id, p.name)}
+                      title="Copy embed code"
                       disabled={!tenantId}
                     >
                       {copiedId === p.id ? '✓ Copied!' : '📋 Copy'}
@@ -95,13 +97,13 @@ export default function Projects(){
                   </td>
                   <td>
                     <div className={styles.actionButtons}>
-                      <button className="btn2" onClick={()=>nav('/projects/'+p.id+'/edit')} title="Edit">
+                      <button className="btn2" onClick={() => nav('/projects/' + p.id + '/edit')} title="Edit">
                         <FaEdit />
                       </button>
-                      <button className="btn2" onClick={()=>onDelete(p.id)} title="Delete">
+                      <button className="btn2" onClick={() => onDelete(p.id)} title="Delete">
                         <MdDelete />
                       </button>
-                      <button className="btn2" onClick={()=>nav('/projects/'+p.id+'/chat')} title="Open Chat">
+                      <button className="btn2" onClick={() => nav('/projects/' + p.id + '/chat')} title="Open Chat">
                         <CiChat2 />
                       </button>
                     </div>
@@ -126,10 +128,10 @@ export default function Projects(){
   )
 }
 
-function formatBytes(n){
+function formatBytes(n) {
   if (!n || n <= 0) return '0 B'
-  const units = ['B','KB','MB','GB','TB']
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
   let i = 0; let v = n
-  while (v >= 1024 && i < units.length-1){ v/=1024; i++ }
-  return `${v.toFixed(v<10?1:0)} ${units[i]}`
+  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++ }
+  return `${v.toFixed(v < 10 ? 1 : 0)} ${units[i]}`
 }

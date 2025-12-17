@@ -140,6 +140,20 @@ function WidgetLayout() {
         {/* Inject CSS to hide webkit scrollbar */}
         <style>{`
           div::-webkit-scrollbar { display: none; }
+          .widget-input-row {
+             display: flex;
+             gap: 8px;
+             align-items: flex-end;
+             background: #f9fafb;
+             border-radius: 12px;
+             padding: 8px;
+          }
+           @media (max-width: 480px) {
+            .widget-input-row {
+              flex-direction: column;
+              align-items: stretch;
+            }
+          }
         `}</style>
 
         {list.length === 0 && (
@@ -177,13 +191,15 @@ function WidgetLayout() {
 
       {/* Input Area */}
       <div style={{ padding: '16px', borderTop: '1px solid #eee', background: '#fff' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', background: '#f9fafb', borderRadius: '12px', padding: '8px' }}>
+        <div className="widget-input-row">
           <TextArea
             value={msg}
             onChange={(e) => setMsg(e.target.value)}
             placeholder="Type your message..."
             style={{
               flex: 1,
+              width: '100%', // FORCE WIDTH FIX
+              minWidth: 0, // FLEXBOX OVERFLOW FIX
               minHeight: '24px',
               maxHeight: '100px',
               background: 'transparent',
@@ -207,7 +223,8 @@ function WidgetLayout() {
               borderRadius: '8px',
               padding: '8px 12px',
               height: '36px',
-              opacity: (!msg.trim() || pending) ? 0.5 : 1
+              opacity: (!msg.trim() || pending) ? 0.5 : 1,
+              flexShrink: 0
             }}
           >
             Send

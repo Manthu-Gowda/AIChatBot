@@ -1,4 +1,4 @@
-;(function () {
+; (function () {
   const script = document.currentScript
   const src = new URL(script.src)
   const base = `${src.protocol}//${src.host}`
@@ -10,11 +10,7 @@
   const btn = document.createElement('div')
   // Robo Icon SVG
   btn.innerHTML = `
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 4C14.21 4 16 5.79 16 8C16 10.21 14.21 12 12 12C9.79 12 8 10.21 8 8C8 5.79 9.79 4 12 4ZM12 20C9.33 20 7 18 7 15C7 14.4 7.15 13.84 7.42 13.35C8.63 13.79 9.94 14.08 11.3 14.15C11.53 14.16 11.76 14.16 12 14.16C12.24 14.16 12.47 14.16 12.7 14.15C14.06 14.08 15.37 13.79 16.58 13.35C16.85 13.84 17 14.4 17 15C17 18 14.67 20 12 20ZM12 16.5C12.83 16.5 13.5 15.83 13.5 15C13.5 14.17 12.83 13.5 12 13.5C11.17 13.5 10.5 14.17 10.5 15C10.5 15.83 11.17 16.5 12 16.5Z" fill="white"/>
-      <circle cx="9" cy="8" r="1.5" fill="white"/>
-      <circle cx="15" cy="8" r="1.5" fill="white"/>
-    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot-message-square-icon lucide-bot-message-square"><path d="M12 6V2H8"/><path d="M15 11v2"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M20 16a2 2 0 0 1-2 2H8.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 4 20.286V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M9 11v2"/></svg>
   `
   btn.style.position = 'fixed'
   btn.style.right = '20px'

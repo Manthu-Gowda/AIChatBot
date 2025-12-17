@@ -206,6 +206,24 @@ app.get(['/widget-layout', '/widget'], async (req, res) => {
       }
     }
 
+    // DYNAMIC LOCALHOST SUPPORT
+    // If the request comes from a localhost origin (IPv4 or IPv6 or 'localhost' hostname), allow it dynamically.
+    // This allows users to test on any local port without configuring it.
+    const reqOrigin = req.headers.origin || req.headers.referer
+    if (reqOrigin) {
+      try {
+        const u = new URL(reqOrigin)
+        if (u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '[::1]') {
+          const originVal = `${u.protocol}//${u.host}` // protocol + host (host includes port)
+          if (!faParts.includes(originVal)) {
+            faParts.push(originVal)
+            // eslint-disable-next-line no-console
+            console.log(`[Widget] Dynamically allowed localhost origin: ${originVal}`)
+          }
+        }
+      } catch (e) { /* ignore parse errors */ }
+    }
+
     const fa = faParts.filter(Boolean).join(' ')
     if (faParts.length > 0) {
       res.setHeader('Content-Security-Policy', `frame-ancestors ${fa}`)
