@@ -154,13 +154,9 @@ if (isProd) {
   // Serve static files from the frontend build directory
   app.use(express.static(FRONTEND_DIST))
 
-  // HTML catch‑all for SPA routes: if the client is requesting an HTML page,
-  // serve index.html and let the frontend router handle it. API/stream requests
-  // (Accept not including text/html) fall through to backend routes below.
   app.get('*', (req, res, next) => {
     const accept = String(req.headers.accept || '')
     if (req.method === 'GET' && accept.includes('text/html')) {
-      // Allow cross-origin embedding when used as widget
       res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
       return res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
     }
