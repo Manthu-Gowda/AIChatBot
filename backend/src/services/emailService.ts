@@ -10,6 +10,15 @@ const transporter = nodemailer.createTransport({
   }
 })
 
+// Verify connection configuration
+transporter.verify(function (error, success) {
+  if (error) {
+    console.error('[Email Service] SMTP Connection Error:', error);
+  } else {
+    console.log('[Email Service] SMTP Connection Ready');
+  }
+});
+
 export async function sendNewLeadNotification(data: any) {
   // If credentials are missing, log to console
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
