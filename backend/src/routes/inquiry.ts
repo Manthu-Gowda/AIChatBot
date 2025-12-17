@@ -1,62 +1,8 @@
 import express from 'express'
 import { prisma } from '../prisma/client'
-import { sendOtp } from '../services/emailService'
-import crypto from 'crypto'
+import { sendNewLeadNotification } from '../services/emailService'
 
 const router = express.Router()
-
-// POST /widget/otp/send
-router.post('/otp/send', async (req, res) => {
-  try {
-    const { email } = req.body
-    if (!email) return res.status(400).json({ error: 'Email required' })
-
-    const code = crypto.randomInt(100000, 999999).toString()
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 mins
-
-    // Upsert OTP record
-    await prisma.otp.upsert({
-      where: { email },
-      update: { code, expiresAt },
-      create: { email, code, expiresAt }
-    })
-
-    // Send via email (or log if dev)
-    await sendOtp(email, code)
-
-    res.json({ success: true, message: 'OTP sent' })
-  } catch (error) {
-    console.error('OTP Send Error:', error)
-    res.status(500).json({ error: 'Failed to send OTP' })
-  }
-})
-
-// POST /widget/otp/verify
-router.post('/otp/verify', async (req, res) => {
-  try {
-    const { email, code } = req.body
-    if (!email || !code) return res.status(400).json({ error: 'Email and code required' })
-
-    const record = await prisma.otp.findUnique({ where: { email } })
-    if (!record) return res.status(400).json({ error: 'Invalid or expired OTP' })
-
-    if (new Date() > record.expiresAt) {
-      return res.status(400).json({ error: 'OTP expired' })
-    }
-
-    if (record.code !== code) {
-      return res.status(400).json({ error: 'Invalid code' })
-    }
-
-    // Clear OTP after successful verify
-    await prisma.otp.delete({ where: { email } })
-
-    res.json({ success: true })
-  } catch (error) {
-    console.error('OTP Verify Error:', error)
-    res.status(500).json({ error: 'Verification failed' })
-  }
-})
 
 // POST /widget/inquiry
 // Upsert inquiry details based on email or create new if not exists
@@ -92,6 +38,12 @@ router.post('/inquiry', async (req, res) => {
           phone
         }
       })
+    }
+    
+    // If phone is present, it means the flow is complete => Notify Admin
+    if (phone) {
+       // Fire and forget email notification
+       sendNewLeadNotification(inquiry).catch(err => console.error('Bg Email Error', err))
     }
 
     res.json(inquiry)

@@ -62,7 +62,6 @@ function WidgetLayout() {
 
   // Inquiry Data
   const [inquiry, setInquiry] = useState({ role: '', topic: '', name: '', email: '', phone: '' })
-  const [otpSent, setOtpSent] = useState(false)
 
   // Initial greeting
   useEffect(() => {
@@ -113,35 +112,12 @@ function WidgetLayout() {
           return
         }
         setInquiry(p => ({ ...p, email: text }))
-        setPending(true)
-        // Send OTP
-        const res = await fetch(`${base}/widget/otp/send`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: text })
-        })
-        const data = await res.json()
-        setPending(false)
-        if (data.error) throw new Error(data.error)
 
-        setList(p => [...p, { role: 'assistant', content: `An OTP has been sent to ${text}. Please enter the code below.`, type: 'system' }])
-        setStep('OTP')
-      }
-      else if (step === 'OTP') {
-        setPending(true)
-        const res = await fetch(`${base}/widget/otp/verify`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: inquiry.email, code: text })
-        })
-        const data = await res.json()
-        setPending(false)
-        if (data.error) {
-          setList(p => [...p, { role: 'assistant', content: 'Invalid OTP. Please try again.', type: 'error' }])
-          return
-        }
-
-        setList(p => [...p, { role: 'assistant', content: 'Email verified! Lastly, please enter your phone number.', type: 'system' }])
+        // Skip OTP, go straight to Phone
+        setList(p => [...p, { role: 'assistant', content: 'Got it. Lastly, please enter your phone number.', type: 'system' }])
         setStep('PHONE')
       }
+      // OTP Step Removed
       else if (step === 'PHONE') {
         setInquiry(p => ({ ...p, phone: text }))
         setPending(true)
@@ -333,9 +309,8 @@ function WidgetLayout() {
                 step === 'TOPIC' ? 'Enter topic...' :
                   step === 'NAME' ? 'Enter your name...' :
                     step === 'EMAIL' ? 'Enter your email...' :
-                      step === 'OTP' ? 'Enter correct OTP...' :
-                        step === 'PHONE' ? 'Enter phone number...' :
-                          "Type your message..."
+                      step === 'PHONE' ? 'Enter phone number...' :
+                        "Type your message..."
               }
               style={{
                 flex: 1,
@@ -368,7 +343,7 @@ function WidgetLayout() {
                 flexShrink: 0
               }}
             >
-              {step === 'OTP' ? 'Verify' : 'Send'}
+              Send
             </Button>
           </div>
         )}
