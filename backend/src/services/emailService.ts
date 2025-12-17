@@ -8,7 +8,7 @@ export async function sendNewLeadNotification(data: any) {
     return;
   }
 
-  const adminEmail = process.env.EMAIL_USER || "ksanjaykumar7280@gmail.com";
+  const adminEmail = process.env.EMAIL_USER || "kmanthugowda@gmail.com";
 
   try {
     const result = await resend.emails.send({
