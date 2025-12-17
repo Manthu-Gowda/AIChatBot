@@ -47,6 +47,11 @@ function checkRequiredEnvVars() {
 checkRequiredEnvVars()
 
 const app = express()
+
+app.get('/version', (req, res) => {
+  res.json({ version: 'ProjectLinkDebug-v1', timestamp: new Date().toISOString() })
+})
+
 // In development we disable helmet's contentSecurityPolicy because it can be
 // overly restrictive (default-src 'none') and block DevTools/.well-known
 // requests. Keep CSP enabled in production.
