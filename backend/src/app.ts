@@ -227,6 +227,7 @@ const PORT = Number(process.env.PORT || 4000)
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`API listening on http://localhost:${PORT} (prod=${isProd})`)
+  console.log('Server started [v:ProjectLinkDebug]')
   if (isProd) {
     // eslint-disable-next-line no-console
     console.log(`Serving frontend from: ${FRONTEND_DIST}`)

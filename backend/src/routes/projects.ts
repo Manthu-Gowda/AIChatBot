@@ -12,7 +12,11 @@ const router = Router()
 
 router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
   try {
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG] Project Create Body:', JSON.stringify(req.body, null, 2))
     const data = projectCreateSchema.parse(req.body)
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG] Parsed Data (after zod):', JSON.stringify(data, null, 2))
     let scrapedContent = ''
     if (data.websiteUrl) {
        try { scrapedContent = await scrapeWebsite(data.websiteUrl) } catch (e) { console.error(e) }
