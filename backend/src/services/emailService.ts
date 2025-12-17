@@ -1,25 +1,37 @@
 import nodemailer from 'nodemailer'
 
-// Configure standard SMTP transport
-// Users should provide EMAIL_USER (e.g. gmail) and EMAIL_PASS (app password) in .env
+// Configure SMTP transport from environment variables.
+// Recommended (Gmail): SMTP_HOST=smtp.gmail.com, SMTP_PORT=587, SMTP_SECURE=false
+// Use `EMAIL_USER` and `EMAIL_PASS` (app password for Gmail) for auth.
+const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com'
+const smtpPort = Number(process.env.SMTP_PORT || 587)
+const smtpSecure = (process.env.SMTP_SECURE || 'false').toLowerCase() === 'true'
+
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // use SSL
-  auth: {
+  host: smtpHost,
+  port: smtpPort,
+  secure: smtpSecure,
+  auth: process.env.EMAIL_USER && process.env.EMAIL_PASS ? {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  },
+  } : undefined,
   // Force IPv4 to avoid IPv6 timeouts on some cloud providers (like Render)
-  family: 4 
+  family: 4,
+  // Add reasonable timeouts to surface connection issues quickly
+  connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT || 30000),
+  greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 30000),
+  socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 30000),
+  tls: { rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false' }
 } as any)
 
-// Verify connection configuration
+// Verify connection configuration with clearer logging
 transporter.verify(function (error, success) {
   if (error) {
-    console.error('[Email Service] SMTP Connection Error:', error);
+    console.error('[Email Service] SMTP Connection Error:', error && error.code ? error.code : error)
+    // Helpful debug info (do not print secrets)
+    console.error('[Email Service] SMTP config:', { host: smtpHost, port: smtpPort, secure: smtpSecure })
   } else {
-    console.log('[Email Service] SMTP Connection Ready');
+    console.log('[Email Service] SMTP Connection Ready')
   }
 });
 
