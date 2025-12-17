@@ -20,7 +20,7 @@ export async function sendOtp(to: string, code: string) {
 
   try {
     await transporter.sendMail({
-      from: `"Admin Inquiry" <${process.env.EMAIL_FROM || 'admininquiry@yopmail.com'}>`, // Custom sender name
+      from: `"Admin Inquiry" <${process.env.EMAIL_FROM || 'ksanjaykumar7280@gmail.com'}>`, // Custom sender name
       to,
       subject: 'Your Verification Code',
       text: `Your verification code is: ${code}`,
