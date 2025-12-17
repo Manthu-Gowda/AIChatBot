@@ -66,7 +66,7 @@ function WidgetLayout() {
   // Initial greeting
   useEffect(() => {
     if (step === 'ROLE' && list.length === 0) {
-      setList([{ role: 'assistant', content: 'Hi there! To better assist you, could you please tell me who you are?', type: 'system' }])
+      setList([{ role: 'assistant', content: 'Hi there! To assist you better, could you please tell me who you are?', type: 'system' }])
     }
   }, [step])
 
@@ -186,7 +186,6 @@ function WidgetLayout() {
 
   // Handle Role Button Clicks
   function setRole(r) {
-    setMsg(r) // Fill input
     // Or auto-submit? let's auto submit for UX
     setList(prev => [...prev, { role: 'user', content: r }])
     setInquiry(p => ({ ...p, role: r }))
@@ -196,6 +195,18 @@ function WidgetLayout() {
   async function handleRoleSelection(r) {
     setList(p => [...p, { role: 'assistant', content: 'Great! What topic are you interested in?', type: 'system' }])
     setStep('TOPIC')
+  }
+
+  // Handle Topic Button Clicks
+  function setTopic(t) {
+    setList(prev => [...prev, { role: 'user', content: t }])
+    setInquiry(p => ({ ...p, topic: t }))
+    handleTopicSelection(t)
+  }
+
+  async function handleTopicSelection(t) {
+    setList(p => [...p, { role: 'assistant', content: 'Got it. May I know your name?', type: 'system' }])
+    setStep('NAME')
   }
 
   // Styles to hide scrollbar but keep functionality
@@ -297,6 +308,16 @@ function WidgetLayout() {
                 padding: '8px 16px', borderRadius: '16px', border: '1px solid #4F46E5', background: '#EEF2FF', color: '#4F46E5', cursor: 'pointer', fontWeight: 500
               }}>
                 {r}
+              </button>
+            ))}
+          </div>
+        ) : step === 'TOPIC' ? (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {['Admissions', 'Fee Structure', 'Timetable', 'Curriculum', 'Results', 'Events', 'Other'].map(t => (
+              <button key={t} onClick={() => setTopic(t)} style={{
+                padding: '8px 16px', borderRadius: '16px', border: '1px solid #4F46E5', background: '#EEF2FF', color: '#4F46E5', cursor: 'pointer', fontWeight: 500
+              }}>
+                {t}
               </button>
             ))}
           </div>
