@@ -14,6 +14,7 @@
   "dependencies": {
     "@prisma/client": "^5.18.0",
     "@types/cheerio": "^0.22.35",
+    "@types/nodemailer": "^7.0.4",
     "bcrypt": "^5.1.1",
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
@@ -23,6 +24,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^7.0.11",
     "openai": "^4.55.5",
     "zod": "^3.23.8"
   },

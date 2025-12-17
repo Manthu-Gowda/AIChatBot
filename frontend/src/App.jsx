@@ -52,30 +52,139 @@ function WidgetLayout() {
   const token = new URLSearchParams(window.location.search).get('token')
   const projectId = new URLSearchParams(window.location.search).get('projectId')
   const title = new URLSearchParams(window.location.search).get('title') || 'AI Chat'
+
+  // State: 'START', 'ROLE', 'TOPIC', 'NAME', 'EMAIL', 'OTP', 'PHONE', 'CHAT'
+  const [step, setStep] = useState('ROLE')
   const [msg, setMsg] = useState('')
   const [list, setList] = useState([])
   const [pending, setPending] = useState(false)
   const listRef = useRef(null)
+
+  // Inquiry Data
+  const [inquiry, setInquiry] = useState({ role: '', topic: '', name: '', email: '', phone: '' })
+  const [otpSent, setOtpSent] = useState(false)
+
+  // Initial greeting
+  useEffect(() => {
+    if (step === 'ROLE' && list.length === 0) {
+      setList([{ role: 'assistant', content: 'Hi there! To better assist you, could you please tell me who you are?', type: 'system' }])
+    }
+  }, [step])
 
   // Auto-scroll logic
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
     }
-  }, [list, pending])
+  }, [list, pending, step])
 
-  async function send() {
+  async function handleSend() {
     if (!msg.trim()) return
+    const text = msg.trim()
+    setMsg('')
+
+    // Add user message
+    setList(prev => [...prev, { role: 'user', content: text }])
+
     const { getBackendBaseUrl } = await import('./lib/baseUrl')
     const base = getBackendBaseUrl()
-    setList((l) => [...l, { role: 'user', content: msg, ts: Date.now() }, { role: 'assistant', content: '', ts: Date.now() }])
-    setMsg('') // Clear immediately
+
+    try {
+      if (step === 'ROLE') {
+        const role = text // User typed role
+        setInquiry(p => ({ ...p, role }))
+        setList(p => [...p, { role: 'assistant', content: 'Great! What topic are you interested in?', type: 'system' }])
+        setStep('TOPIC')
+      }
+      else if (step === 'TOPIC') {
+        setInquiry(p => ({ ...p, topic: text }))
+        setList(p => [...p, { role: 'assistant', content: 'Got it. May I know your name?', type: 'system' }])
+        setStep('NAME')
+      }
+      else if (step === 'NAME') {
+        setInquiry(p => ({ ...p, name: text }))
+        setList(p => [...p, { role: 'assistant', content: 'Nice to meet you. Please enter your email address so we can verify you.', type: 'system' }])
+        setStep('EMAIL')
+      }
+      else if (step === 'EMAIL') {
+        // Simple regex validation
+        if (!/\S+@\S+\.\S+/.test(text)) {
+          setList(p => [...p, { role: 'assistant', content: 'Please enter a valid email address.', type: 'error' }])
+          return
+        }
+        setInquiry(p => ({ ...p, email: text }))
+        setPending(true)
+        // Send OTP
+        const res = await fetch(`${base}/widget/otp/send`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: text })
+        })
+        const data = await res.json()
+        setPending(false)
+        if (data.error) throw new Error(data.error)
+
+        setList(p => [...p, { role: 'assistant', content: `An OTP has been sent to ${text}. Please enter the code below.`, type: 'system' }])
+        setStep('OTP')
+      }
+      else if (step === 'OTP') {
+        setPending(true)
+        const res = await fetch(`${base}/widget/otp/verify`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: inquiry.email, code: text })
+        })
+        const data = await res.json()
+        setPending(false)
+        if (data.error) {
+          setList(p => [...p, { role: 'assistant', content: 'Invalid OTP. Please try again.', type: 'error' }])
+          return
+        }
+
+        setList(p => [...p, { role: 'assistant', content: 'Email verified! Lastly, please enter your phone number.', type: 'system' }])
+        setStep('PHONE')
+      }
+      else if (step === 'PHONE') {
+        setInquiry(p => ({ ...p, phone: text }))
+        setPending(true)
+
+        // Save Inquiry
+        const finalInquiry = { ...inquiry, phone: text, projectId }
+        await fetch(`${base}/widget/inquiry`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(finalInquiry)
+        })
+
+        setPending(false)
+        setList(p => [...p, { role: 'assistant', content: 'Thank you! You can now start chatting with our AI.', type: 'system' }])
+        setStep('CHAT')
+        // Initial AI greeting based on context
+        startChat(finalInquiry)
+      }
+      else if (step === 'CHAT') {
+        // Normal Chat Flow
+        doChat(text)
+      }
+    } catch (e) {
+      setList(p => [...p, { role: 'assistant', content: `Error: ${e.message}`, type: 'error' }])
+      setPending(false)
+    }
+  }
+
+  async function startChat(inq) {
+    // Trigger initial AI response based on context
+    const prompt = `Hello, I am ${inq.name}, a ${inq.role}. I am interested in ${inq.topic}.`
+    await doChat(prompt)
+  }
+
+  async function doChat(text) {
+    const { getBackendBaseUrl } = await import('./lib/baseUrl')
+    const base = getBackendBaseUrl()
+    setList(l => [...l, { role: 'assistant', content: '', ts: Date.now() }])
     setPending(true)
 
     try {
       const res = await fetch(base + '/widget/chat?stream=1', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' },
-        body: JSON.stringify({ message: msg, projectId: projectId })
+        body: JSON.stringify({ message: text, projectId: projectId, context: inquiry })
       })
       if (!res.ok) throw new Error('Failed')
 
@@ -97,6 +206,20 @@ function WidgetLayout() {
     } finally {
       setPending(false)
     }
+  }
+
+  // Handle Role Button Clicks
+  function setRole(r) {
+    setMsg(r) // Fill input
+    // Or auto-submit? let's auto submit for UX
+    setList(prev => [...prev, { role: 'user', content: r }])
+    setInquiry(p => ({ ...p, role: r }))
+    handleRoleSelection(r)
+  }
+
+  async function handleRoleSelection(r) {
+    setList(p => [...p, { role: 'assistant', content: 'Great! What topic are you interested in?', type: 'system' }])
+    setStep('TOPIC')
   }
 
   // Styles to hide scrollbar but keep functionality
@@ -191,45 +314,64 @@ function WidgetLayout() {
 
       {/* Input Area */}
       <div style={{ padding: '16px', borderTop: '1px solid #eee', background: '#fff' }}>
-        <div className="widget-input-row">
-          <TextArea
-            value={msg}
-            onChange={(e) => setMsg(e.target.value)}
-            placeholder="Type your message..."
-            style={{
-              flex: 1,
-              width: '100%', // FORCE WIDTH FIX
-              minWidth: 0, // FLEXBOX OVERFLOW FIX
-              minHeight: '24px',
-              maxHeight: '100px',
-              background: 'transparent',
-              border: 0,
-              padding: '8px',
-              resize: 'none',
-              outline: 'none',
-              fontSize: '14px'
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                send()
+        {step === 'ROLE' ? (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {['Parent', 'Teacher', 'Student'].map(r => (
+              <button key={r} onClick={() => setRole(r)} style={{
+                padding: '8px 16px', borderRadius: '16px', border: '1px solid #4F46E5', background: '#EEF2FF', color: '#4F46E5', cursor: 'pointer', fontWeight: 500
+              }}>
+                {r}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="widget-input-row">
+            <TextArea
+              value={msg}
+              onChange={(e) => setMsg(e.target.value)}
+              placeholder={
+                step === 'TOPIC' ? 'Enter topic...' :
+                  step === 'NAME' ? 'Enter your name...' :
+                    step === 'EMAIL' ? 'Enter your email...' :
+                      step === 'OTP' ? 'Enter correct OTP...' :
+                        step === 'PHONE' ? 'Enter phone number...' :
+                          "Type your message..."
               }
-            }}
-          />
-          <Button
-            onClick={send}
-            disabled={!msg.trim() || pending}
-            style={{
-              borderRadius: '8px',
-              padding: '8px 12px',
-              height: '36px',
-              opacity: (!msg.trim() || pending) ? 0.5 : 1,
-              flexShrink: 0
-            }}
-          >
-            Send
-          </Button>
-        </div>
+              style={{
+                flex: 1,
+                width: '100%',
+                minWidth: 0,
+                minHeight: '24px',
+                maxHeight: '100px',
+                background: 'transparent',
+                border: 0,
+                padding: '8px',
+                resize: 'none',
+                outline: 'none',
+                fontSize: '14px'
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend()
+                }
+              }}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!msg.trim() || pending}
+              style={{
+                borderRadius: '8px',
+                padding: '8px 12px',
+                height: '36px',
+                opacity: (!msg.trim() || pending) ? 0.5 : 1,
+                flexShrink: 0
+              }}
+            >
+              {step === 'OTP' ? 'Verify' : 'Send'}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

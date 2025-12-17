@@ -12,6 +12,7 @@ import projectRoutes from './routes/projects'
 import folderRoutes from './routes/folders'
 import chatRoutes from './routes/chat'
 import widgetRoutes from './routes/widget'
+import inquiryRoutes from './routes/inquiry'
 import { prisma } from './prisma/client'
 import configRoutes from './routes/config'
 import { authLimiter, chatLimiter } from './middleware/rateLimit'
@@ -171,6 +172,7 @@ app.use('/projects', projectRoutes)
 app.use('/folders', folderRoutes)
 app.use('/chat', chatLimiter, chatRoutes)
 app.use('/widget', widgetRoutes)
+app.use('/widget', inquiryRoutes) // Mount inquiry routes (otp, inquiry) under /widget
 app.use('/config', configRoutes)
 
 // Widget layout (Allows iframe embedding)
