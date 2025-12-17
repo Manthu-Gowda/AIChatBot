@@ -253,8 +253,9 @@ app.listen(PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`Serving frontend from: ${FRONTEND_DIST}`)
   }
-  // Auto-open the UI when serving the frontend from the backend
-  const shouldOpen = process.env.SERVE_FRONTEND === 'true' || process.env.OPEN_BROWSER === 'true'
+  // Auto-open the UI when serving the frontend from the backend (only in dev or if explicitly requested)
+  // We disable this in production (isProd) to avoid 'xdg-open' errors on servers.
+  const shouldOpen = !isProd && (process.env.SERVE_FRONTEND === 'true' || process.env.OPEN_BROWSER === 'true')
   const urlToOpen = isProd ? `http://localhost:${PORT}` : FRONTEND_URL
   if (shouldOpen) {
     const platform = process.platform

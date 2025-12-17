@@ -3,12 +3,16 @@ import nodemailer from 'nodemailer'
 // Configure standard SMTP transport
 // Users should provide EMAIL_USER (e.g. gmail) and EMAIL_PASS (app password) in .env
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or use host/port if configured
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // use SSL
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
-})
+  },
+  // Force IPv4 to avoid IPv6 timeouts on some cloud providers (like Render)
+  family: 4 
+} as any)
 
 // Verify connection configuration
 transporter.verify(function (error, success) {
