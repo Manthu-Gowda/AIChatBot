@@ -201,8 +201,18 @@ app.get(['/widget-layout', '/widget'], async (req, res) => {
     if (projectId) {
       try {
         const project = await prisma.project.findFirst({ where: { id: projectId }, select: { projectLink: true } })
-        const pLink = project?.projectLink ? String(project.projectLink).replace(/\/+$/, '') : ''
-        if (pLink) faParts.push(pLink)
+        if (project?.projectLink) {
+          try {
+            // Extract distinct origin (protocol + host) from the stored link
+            // This handles cases where user entered a full URL with path (e.g. https://site.com/page)
+            const origin = new URL(project.projectLink).origin
+            faParts.push(origin)
+          } catch (e) {
+             // Fallback if not a valid URL structure
+             const pLink = String(project.projectLink).replace(/\/+$/, '')
+             if (pLink) faParts.push(pLink)
+          }
+        }
       } catch (err) {
         console.error('[Widget] Failed to load project for CSP:', err)
       }
