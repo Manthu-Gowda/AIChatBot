@@ -58,9 +58,12 @@ app.get('/version', (req, res) => {
 // requests. Keep CSP enabled in production.
 if (process.env.NODE_ENV === 'production') {
   app.use(helmet({
+    frameguard: false,
     contentSecurityPolicy: {
+       useDefaults: true,
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "frame-ancestors": ["*"],
         "img-src": ["'self'", "data:", "https:", "blob:"],
         "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
         "connect-src": ["'self'", "https:", "wss:"], // Allow WebSocket if needed
