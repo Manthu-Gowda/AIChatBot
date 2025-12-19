@@ -5,6 +5,7 @@ import { requireWidget } from '../middleware/auth'
 import { decrypt } from '../services/cryptoService'
 import { chatWithProvider, streamWithProvider } from '../services/ai/router'
 import { retrieveContext } from '../services/rag/retrieve'
+import fs from 'fs'
 
 const router = Router()
 
@@ -36,7 +37,7 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
     const tenantId = req.user!.id
     const projectId = bodyProjectId || req.projectId
     const settings = await prisma.settings.findUnique({ where: { userId: tenantId } })
-    
+
     let provider = (providerOverride || settings?.defaultProvider || 'GEMINI') as any
     let keyEnc: string | null = null
 
@@ -56,12 +57,12 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
     // Given the requirement "User particular Project API only", we should probably NOT fallback if project is defined.
     // However, for safety if key is missing in project, maybe fallback? 
     // Let's assume strict for now to match chat.ts logic.
-    
+
     if (!keyEnc && !projectId) {
-        // Only check global settings if NOT using a project-specific config (or if project lookup failed?)
-        // But logic above tries project first. 
-        // Let's keep the switch as fallback for backward compatibility if projectId is missing.
-        switch (provider) {
+      // Only check global settings if NOT using a project-specific config (or if project lookup failed?)
+      // But logic above tries project first. 
+      // Let's keep the switch as fallback for backward compatibility if projectId is missing.
+      switch (provider) {
         case 'OPENAI': keyEnc = settings?.openaiKeyEnc ?? null; break
         case 'DEEPSEEK': keyEnc = settings?.deepseekKeyEnc ?? null; break
         case 'GEMINI': keyEnc = settings?.geminiKeyEnc ?? null; break
@@ -70,7 +71,7 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
         case 'MISTRAL': keyEnc = settings?.mistralKeyEnc ?? null; break
         case 'OPENROUTER': keyEnc = settings?.openrouterKeyEnc ?? null; break
         case 'GROQ': keyEnc = settings?.groqKeyEnc ?? null; break
-        }
+      }
     }
     if (!keyEnc) return res.status(400).json({ error: { message: 'Missing API key', provider } })
     let apiKey: string
@@ -79,10 +80,33 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
 
     let systemPrompt: string | undefined
     if (projectId) {
-      const project = await prisma.project.findFirst({ where: { id: projectId, userId: tenantId } })
+      const project = await prisma.project.findFirst({ where: { id: projectId, userId: tenantId }, include: { files: true } })
       if (project) {
         const ctx = await retrieveContext(project)
-        systemPrompt = `You are a helpful embedded assistant.\n${ctx}`
+
+        let rolePrompt = `You are a helpful embedded assistant.`
+        if (project.role) rolePrompt = `You are: ${project.role}.`
+        if (project.responsibilities) rolePrompt += `\nYour responsibilities: ${project.responsibilities}.`
+
+        systemPrompt = `${rolePrompt}\n\nUse the following project context to assist the user. strictly adhere to your role and responsibilities.\n\nIMPORTANT: You must answer ONLY using the information provided in the WEBSITE CONTENT and UPLOADED FILES CONTEXT below. Do not use any external knowledge. If the answer is not in the context, state that you do not have the information.`
+
+        if (project.scrapedContent) {
+          systemPrompt += `\n\nWEBSITE CONTENT:\n${project.scrapedContent.slice(0, 15000)}`
+        }
+
+        let fileContent = ''
+        if (project.files?.length) {
+          for (const f of project.files) {
+            try {
+              if ((f.mimetype && f.mimetype.startsWith('text/')) || f.filename.match(/\.(md|txt|json|js|ts|html|css|csv)$/i)) {
+                const txt = fs.readFileSync(f.path, 'utf8')
+                fileContent += `\n\n--- FILE: ${f.filename} ---\n${txt.slice(0, 10000)}`
+              }
+            } catch (e) { console.error('Failed to read context file', f.path) }
+          }
+        }
+
+        if (ctx || fileContent) systemPrompt += `\n\nUPLOADED FILES CONTEXT:\n${ctx}${fileContent}`
       }
     }
     const wantsStream = (req.headers.accept || '').includes('text/event-stream') || String((req.query as any).stream) === '1'
@@ -92,7 +116,7 @@ router.post('/chat', requireWidget, async (req: any, res, next) => {
       res.setHeader('Cache-Control', 'no-cache')
       res.setHeader('Connection', 'keep-alive')
       res.setHeader('X-Accel-Buffering', 'no')
-      ;(res as any).flushHeaders?.()
+        ; (res as any).flushHeaders?.()
       const send = (data: any) => res.write(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`)
       try {
         await streamWithProvider(provider as any, apiKey, [{ role: 'user', content: message }], systemPrompt, (t) => send({ token: t }))

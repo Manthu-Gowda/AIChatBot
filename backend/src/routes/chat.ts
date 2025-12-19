@@ -4,6 +4,7 @@ import { AuthRequest, requireAuth } from '../middleware/auth'
 import { chatSchema } from '../utils/validator'
 import { decrypt } from '../services/cryptoService'
 import { chatWithProvider, streamWithProvider } from '../services/ai/router'
+import fs from 'fs'
 import { retrieveContext } from '../services/rag/retrieve'
 
 const router = Router()
@@ -12,11 +13,11 @@ async function resolveProvider(userId: string, projectId: string | undefined, pr
   console.log('[resolveProvider] Start:', { userId, projectId, providerOverride })
   // If projectId is present, use Project config PREFERENTIALLY
   if (projectId) {
-     const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
-     console.log('[resolveProvider] Project found:', !!project, 'Provider:', (project as any)?.provider)
-     if (project && (project as any).provider) {
-        return { provider: (project as any).provider, keyEnc: (project as any).apiKeyEnc }
-     }
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
+    console.log('[resolveProvider] Project found:', !!project, 'Provider:', (project as any)?.provider)
+    if (project && (project as any).provider) {
+      return { provider: (project as any).provider, keyEnc: (project as any).apiKeyEnc }
+    }
   }
 
   // Fallback to legacy/global settings for backward compat or non-project chats (if any)
@@ -65,18 +66,32 @@ router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
 
     let systemPrompt: string | undefined
     if (projectId) {
-      const project = await prisma.project.findFirst({ where: { id: projectId, userId: req.user!.id } })
+      const project = await prisma.project.findFirst({ where: { id: projectId, userId: req.user!.id }, include: { files: true } })
       if (project) {
         const ctx = await retrieveContext(project)
         let rolePrompt = `You are a helpful assistant.`
         if (project.role) rolePrompt = `You are: ${project.role}.`
         if (project.responsibilities) rolePrompt += `\nYour responsibilities: ${project.responsibilities}.`
-        
-        systemPrompt = `${rolePrompt}\n\nUse the following project context to assist the user. strictly adhere to your role and responsibilities.`
+
+        systemPrompt = `${rolePrompt}\n\nUse the following project context to assist the user. strictly adhere to your role and responsibilities.\n\nIMPORTANT: You must answer ONLY using the information provided in the WEBSITE CONTENT and UPLOADED FILES CONTEXT below. Do not use any external knowledge. If the answer is not in the context, state that you do not have the information.`
+
         if (project.scrapedContent) {
-           systemPrompt += `\n\nWEBSITE CONTENT:\n${project.scrapedContent.slice(0, 15000)}`
+          systemPrompt += `\n\nWEBSITE CONTENT:\n${project.scrapedContent.slice(0, 15000)}`
         }
-        if (ctx) systemPrompt += `\n\nUPLOADED FILES CONTEXT:\n${ctx}`
+
+        let fileContent = ''
+        if (project.files?.length) {
+          for (const f of project.files) {
+            try {
+              if ((f.mimetype && f.mimetype.startsWith('text/')) || f.filename.match(/\.(md|txt|json|js|ts|html|css|csv)$/i)) {
+                const txt = fs.readFileSync(f.path, 'utf8')
+                fileContent += `\n\n--- FILE: ${f.filename} ---\n${txt.slice(0, 10000)}`
+              }
+            } catch (e) { console.error('Failed to read context file', f.path) }
+          }
+        }
+
+        if (ctx || fileContent) systemPrompt += `\n\nUPLOADED FILES CONTEXT:\n${ctx}${fileContent}`
       }
     }
 
@@ -87,7 +102,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res, next) => {
       res.setHeader('Cache-Control', 'no-cache')
       res.setHeader('Connection', 'keep-alive')
       res.setHeader('X-Accel-Buffering', 'no')
-      ;(res as any).flushHeaders?.()
+        ; (res as any).flushHeaders?.()
       const send = (data: any) => res.write(`data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`)
       let full = ''
       try {
