@@ -2,8 +2,8 @@ import sgMail from "@sendgrid/mail";
 
 export async function sendNewLeadNotification(data: any) {
   const apiKey = process.env.SENDGRID_API_KEY;
-  const fromAddress = "manthugowda4u@gmail.com";
-  const toAddress = "manthugowda4u@gmail.com";
+  const fromAddress = process.env.EMAIL_FROM;
+  const toAddress = process.env.EMAIL_TO;
 
   if (!apiKey) {
     console.error("[Email Service] SENDGRID_API_KEY missing in environment");
@@ -17,19 +17,24 @@ export async function sendNewLeadNotification(data: any) {
 
   sgMail.setApiKey(apiKey);
 
+  const subject = `New Lead: ${data?.name || "Unknown"} (${data?.topic || "No Topic"})`;
+  const html = `
+    <h2>New Lead Received</h2>
+    <p><strong>Name:</strong> ${data?.name || "-"}</p>
+    <p><strong>Email:</strong> ${data?.email || "-"}</p>
+    <p><strong>Phone:</strong> ${data?.phone || "-"}</p>
+    <p><strong>Topic:</strong> ${data?.topic || "-"}</p>
+    <p><strong>Role:</strong> ${data?.role || "-"}</p>
+    <p><strong>Project ID:</strong> ${data?.projectId || "-"}</p>
+  `;
+
   try {
     const result = await sgMail.send({
-      from: `Admin Inquiry <${fromAddress}>`,
       to: toAddress,
-      subject: `New Lead: ${data?.name || "Unknown"} (${data?.topic || "No Topic"})`,
-      html: `
-        <h2>New Lead Received</h2>
-        <p><strong>Name:</strong> ${data?.name || "-"}</p>
-        <p><strong>Email:</strong> ${data?.email || "-"}</p>
-        <p><strong>Phone:</strong> ${data?.phone || "-"}</p>
-        <p><strong>Topic:</strong> ${data?.topic || "-"}</p>
-        <p><strong>Role:</strong> ${data?.role || "-"}</p>
-      `,
+      from: fromAddress,
+      subject,
+      text: subject,
+      html,
     });
 
     console.log("[Email Service] SendGrid result:", result);

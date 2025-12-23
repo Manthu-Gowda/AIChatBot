@@ -42,7 +42,7 @@ jest-cache/
 
 # Optional npm cache
 .npm
-
+.env
 # Lock files (if you prefer not to track)
 # package-lock.json
 # yarn.lock
