@@ -1,29 +1,26 @@
-import nodemailer from "nodemailer";
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+import sgMail from "@sendgrid/mail";
 
 export async function sendNewLeadNotification(data: any) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error("[Email Service] EMAIL_USER or EMAIL_PASS missing in environment");
+  const apiKey = process.env.SENDGRID_API_KEY;
+  const fromAddress = "manthugowda4u@gmail.com";
+  const toAddress = "manthugowda4u@gmail.com";
+
+  if (!apiKey) {
+    console.error("[Email Service] SENDGRID_API_KEY missing in environment");
     return;
   }
 
-  const adminEmail =
-    process.env.EMAIL_TO || process.env.EMAIL_USER || "'ksanjaykumar7280@gmail.com";
-  const fromAddress = process.env.EMAIL_USER || "'ksanjaykumar7280@gmail.com";
+  if (!fromAddress || !toAddress) {
+    console.error("[Email Service] EMAIL_FROM or EMAIL_TO missing in environment");
+    return;
+  }
+
+  sgMail.setApiKey(apiKey);
 
   try {
-    const result = await transporter.sendMail({
+    const result = await sgMail.send({
       from: `Admin Inquiry <${fromAddress}>`,
-      to: adminEmail,
+      to: toAddress,
       subject: `New Lead: ${data?.name || "Unknown"} (${data?.topic || "No Topic"})`,
       html: `
         <h2>New Lead Received</h2>
@@ -32,13 +29,14 @@ export async function sendNewLeadNotification(data: any) {
         <p><strong>Phone:</strong> ${data?.phone || "-"}</p>
         <p><strong>Topic:</strong> ${data?.topic || "-"}</p>
         <p><strong>Role:</strong> ${data?.role || "-"}</p>
-        <p><strong>Project ID:</strong> ${data?.projectId || "-"}</p>
       `,
     });
 
-    console.log("[Email Service] Gmail result:", result);
+    console.log("[Email Service] SendGrid result:", result);
   } catch (error: any) {
     console.error("[Email Service] Failed:", error?.message || error);
-    if (error?.response) console.error("[Email Service] Response:", error.response);
+    if (error?.response?.body) {
+      console.error("[Email Service] Response:", error.response.body);
+    }
   }
 }
